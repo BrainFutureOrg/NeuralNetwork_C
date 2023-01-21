@@ -3,4 +3,4 @@ project(C_version C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(C_version main.c)
+add_executable(C_version main.c matrix_operations.c matrix_operations.h)

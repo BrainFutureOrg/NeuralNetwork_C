@@ -1,0 +1,8 @@
+//
+// Created by maximus on 21.01.23.
+//
+
+#ifndef C_VERSION_MATRIX_OPERATIONS_H
+#define C_VERSION_MATRIX_OPERATIONS_H
+
+#endif //C_VERSION_MATRIX_OPERATIONS_H
