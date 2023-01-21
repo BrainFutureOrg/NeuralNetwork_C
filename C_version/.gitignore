@@ -98,6 +98,4 @@ crashlytics-build.properties
 fabric.properties
 
 # custom, from our experience
-/cmake-build-debug/CMakeCache.txt
-/cmake-build-debug/cmake_install.cmake
-/cmake-build-debug/CMakeFiles/TargetDirectories.txt
+/cmake-build-debug/
