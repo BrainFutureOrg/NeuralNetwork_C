@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "matrix_operations.h"
 
-matrix matrix_multiplication (matrix first_matrix, matrix second_matrix) {
+matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
     matrix result;
     if (first_matrix.j != second_matrix.i) {
         errno = ERANGE;
@@ -14,11 +14,7 @@ matrix matrix_multiplication (matrix first_matrix, matrix second_matrix) {
         result.i = result.j = 0;
         return result;
     }
-    result.table = calloc(first_matrix.i, sizeof(double *));
-    for (int i = 0; i < first_matrix.i; i++) {
-        result.table[i] = calloc(second_matrix.j, sizeof(double));
-
-    }
+    result = matrix_creation(first_matrix.i, second_matrix.j);
     for (int i = 0; i < first_matrix.i; i++) {
         for (int j = 0; j < second_matrix.j; j++) {
             result.table[i][j] = 0;
@@ -27,14 +23,51 @@ matrix matrix_multiplication (matrix first_matrix, matrix second_matrix) {
             }
         }
     }
-    result.i = first_matrix.i;
-    result.j = second_matrix.j;
-
     return result;
 }
 
-matrix matrix_transposition (matrix matrix_to_transpose) {
-    double **result;
+#pragma region add
+
+matrix matrix_addition(matrix first_matrix, matrix second_matrix) {
+    matrix result;
+    if (first_matrix.i != second_matrix.i || first_matrix.j != second_matrix.j) {
+        errno = ERANGE;
+        result.i = result.j = 0;
+        return result;
+    }
+    result = matrix_copy(first_matrix);
+    for (int i = 0; i < first_matrix.i; i++) {
+        for (int j = 0; j < first_matrix.j; j++) {
+            result.table[i][j] += second_matrix.table[i][j];
+        }
+    }
+    return result;
+}
+
+#pragma endregion
+
+matrix matrix_creation(int i, int j) {
+    matrix result;
+    result.i = i;
+    result.j = j;
+    result.table = calloc(i, sizeof(double *));
+    for (int iterator = 0; iterator < i; iterator++) {
+        result.table[i] = calloc(j, sizeof(double));
+    }
+    return result;
+}
+
+matrix matrix_copy(matrix matrix_to_copy) {
+    matrix copy = matrix_creation(matrix_to_copy.i, matrix_to_copy.j);
+    for (int i = 0; i < matrix_to_copy.i; i++) {
+        for (int j = 0; j < matrix_to_copy.j; j++) {
+            copy.table[i][j] = matrix_to_copy.table[i][j];
+        }
+    }
+    return copy;
+}
+
+matrix matrix_transposition(matrix matrix_to_transpose) {
     matrix result_matrix;
     result_matrix = matrix_creation(matrix_to_transpose.j, matrix_to_transpose.i);
     for (int i = 0; i < matrix_to_transpose.i; i++) {
@@ -45,7 +78,7 @@ matrix matrix_transposition (matrix matrix_to_transpose) {
     return result_matrix;
 }
 
-void matrix_print (matrix matrix_to_print) {
+void matrix_print(matrix matrix_to_print) {
     for (int i = 0; i < matrix_to_print.i; i++) {
         for (int j = 0; j < matrix_to_print.j; j++) {
             printf("%.2f ", matrix_to_print.table[i][j]);
@@ -54,7 +87,7 @@ void matrix_print (matrix matrix_to_print) {
     }
 }
 
-void matrix_free (matrix matrix_to_free) {
+void matrix_free(matrix matrix_to_free) {
     for (int i = 0; i < matrix_to_free.i; ++i) {
         free(matrix_to_free.table[i]);
     }
