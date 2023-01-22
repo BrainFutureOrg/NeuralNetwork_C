@@ -36,18 +36,12 @@ matrix matrix_multiplication (matrix first_matrix, matrix second_matrix) {
 matrix matrix_transposition (matrix matrix_to_transpose) {
     double **result;
     matrix result_matrix;
-    result = calloc(matrix_to_transpose.j, sizeof(double *));
-    for (int i = 0; i < matrix_to_transpose.j; i++) {
-        result[i] = calloc(matrix_to_transpose.i, sizeof(double));
-    }
+    result_matrix = matrix_creation(matrix_to_transpose.j, matrix_to_transpose.i);
     for (int i = 0; i < matrix_to_transpose.i; i++) {
         for (int j = 0; j < matrix_to_transpose.j; j++) {
-            result[j][i] = matrix_to_transpose.table[i][j];
+            result_matrix.table[j][i] = matrix_to_transpose.table[i][j];
         }
     }
-    result_matrix.table = result;
-    result_matrix.i = matrix_to_transpose.j;
-    result_matrix.j = matrix_to_transpose.i;
     return result_matrix;
 }
 
@@ -65,4 +59,31 @@ void matrix_free (matrix matrix_to_free) {
         free(matrix_to_free.table[i]);
     }
     free(matrix_to_free.table);
+}
+
+void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(double)) {
+    for (int i = 0; i < matrix_for_operation.i; i++) {
+        for (int j = 0; j < matrix_for_operation.j; j++) {
+            matrix_for_operation.table[j][i] = func(matrix_for_operation.table[j][i]);
+        }
+    }
+}
+
+void matrix_multiply_by_constant(matrix matrix_for_operation, double number) {
+    for (int i = 0; i < matrix_for_operation.i; i++) {
+        for (int j = 0; j < matrix_for_operation.j; j++) {
+            matrix_for_operation.table[j][i] = number * matrix_for_operation.table[j][i];
+        }
+    }
+}
+
+matrix make_matrix_from_array(double **double_array, int i, int j) {
+    matrix result;
+    result = matrix_creation(i, j);
+    for (int iterator = 0; iterator < i; iterator++) {
+        for (int iterator1 = 0; iterator1 < j; iterator1++) {
+            result.table[iterator][iterator1] = double_array[iterator][iterator1];
+        }
+    }
+    return result;
 }

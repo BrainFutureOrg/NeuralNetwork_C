@@ -10,8 +10,8 @@ void check_matrix_multiplication();
 int main() {
 
 //    printf("Hello, World!\n");
-    check_matrix_multiplication();
-//    check_matrix_print();
+//    check_matrix_multiplication();
+    check_matrix_print();
     return 0;
 }
 
@@ -22,20 +22,8 @@ void check_matrix_print() {
                             {5, 6}};
     int size1 = sizeof(matrix1) / sizeof(matrix1[0]);
     int size2 = sizeof(matrix1[0]) / sizeof(matrix1[0][0]);
-    double **matrix_pointer;
-    matrix_pointer = calloc(size1, sizeof(double *));
-    for (int i = 0; i < size1; ++i) {
-        matrix_pointer[i] = calloc(size2, sizeof(double));
-    }
-    for (int i = 0; i < size1; ++i) {
-        for (int j = 0; j < size2; ++j) {
-            matrix_pointer[i][j] = matrix1[i][j];
-        }
-    }
     matrix checking;
-    checking.table = matrix_pointer;
-    checking.i = size1;
-    checking.j = size2;
+    checking = make_matrix_from_array(matrix1, size1, size2);
 
     matrix_print(checking);
 //    matrix_free(checking);
