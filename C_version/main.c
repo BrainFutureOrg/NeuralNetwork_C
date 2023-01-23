@@ -2,13 +2,15 @@
 #include <stdlib.h>
 #include "matrix_operations.h"
 #include <errno.h>
+#include <stdlib.h>
+#include <time.h>
 
 void check_matrix_print();
 
 void check_matrix_multiplication();
 
 int main() {
-
+    srand(time(NULL));
 //    printf("Hello, World!\n");
 //    check_matrix_multiplication();
     check_matrix_print();

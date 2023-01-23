@@ -27,10 +27,10 @@ typedef struct neural_network {
 
 network_start_layer create_network(int neuron_numbers);
 
-void add_layer(neural_network network, int neuron_numbers, void (*activation_function)(matrix));
+void add_layer(network_start_layer network, int neuron_numbers, char *activation_function_name);
 
-void learn_step(neural_network network, double learning_rate, matrix start_layer, matrix result_layer);
+void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer);
 
-matrix predict(neural_network network, matrix start_layer);
+matrix predict(network_start_layer network, matrix start_layer);
 
 #endif //C_VERSION_NEURAL_NETWORK_H
