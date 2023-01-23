@@ -11,8 +11,6 @@ void check_matrix_multiplication();
 
 int main() {
     srand(time(NULL));
-//    printf("Hello, World!\n");
-//    check_matrix_multiplication();
     check_matrix_print();
     return 0;
 }

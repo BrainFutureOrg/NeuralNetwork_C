@@ -36,9 +36,9 @@ void add_function_with_derivative(neural_network *network_layer, char *activatio
     }
 }
 
-neural_network* last_layer(network_start_layer network){
+neural_network *last_layer(network_start_layer network) {
     neural_network *current = network.next_layer;
-    if(current==NULL) return current;
+    if (current == NULL) return current;
     while (current->next_layer != NULL) {
         current = current->next_layer;
     }
@@ -110,14 +110,20 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
     return current_results;
 }
 
-void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer) {
-    //matrix errors= matrix_creation(result_layer.i, 1)
-    matrix errors = matrix_substact(result_layer, predict(network, start_layer));
+void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer) { //UNSURE
     int layer_number = count_hidden_layers(network);
-    matrix *distributed_errors = calloc(layer_number, sizeof(matrix *));
-    distributed_errors[layer_number - 1] = errors;
-    for (int i = layer_number - 1; i > 0; i--) {
-        distributed_errors[i-1]= matrix_multiplication(matrix_transposition())
+    matrix *prediction = predict_all_layers(network, start_layer);
+    matrix errors = matrix_substact(result_layer, prediction[layer_number]);
+    matrix distributed_error = errors;
+    neural_network *current = last_layer(network);
+    for (int i = layer_number; i > 0; i--) {
+        matrix derived_results = matrix_multiplication(current->weights, prediction[i - 1]);
+        current->activation_function_derivative(&derived_results);
+        matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
+                                             matrix_transposition(prediction[i - 1]));
+        matrix_multiply_by_constant(delta, learning_rate);
+        current->weights = matrix_addition(current->weights, delta);
+        distributed_error = matrix_multiplication(matrix_transposition(current->weights), distributed_error);
     }
 }
 

@@ -10,7 +10,6 @@ matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
     matrix result;
     if (first_matrix.j != second_matrix.i) {
         errno = ERANGE;
-        //result.table=(double**)malloc(0);
         result.i = result.j = 0;
         return result;
     }
