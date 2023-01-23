@@ -33,4 +33,6 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
 
 matrix predict(network_start_layer network, matrix start_layer);
 
+double accuracy(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_accuracy);
+
 #endif //C_VERSION_NEURAL_NETWORK_H

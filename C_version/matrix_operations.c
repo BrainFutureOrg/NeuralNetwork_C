@@ -127,3 +127,14 @@ matrix matrix_substact(matrix first_matrix, matrix second_matrix) {
     return matrix_addition(result, second_matrix);
 
 }
+
+matrix matrix_multiplication_elements(matrix first_matrix, matrix second_matrix) {
+    matrix result;
+    result = first_matrix;
+    for (int i = 0; i < first_matrix.i; ++i) {
+        for (int j = 0; j < first_matrix.j; ++j) {
+            result.table[i][j] *= second_matrix.table[i][j];
+        }
+    }
+    return result;
+}
