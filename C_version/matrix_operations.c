@@ -120,3 +120,10 @@ matrix make_matrix_from_array(double **double_array, int i, int j) {
     }
     return result;
 }
+
+matrix matrix_substact(matrix first_matrix, matrix second_matrix) {
+    matrix result = first_matrix;
+    matrix_multiply_by_constant(second_matrix, -1);
+    return matrix_addition(result, second_matrix);
+
+}

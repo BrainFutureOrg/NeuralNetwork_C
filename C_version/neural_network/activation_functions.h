@@ -5,8 +5,6 @@
 #ifndef C_VERSION_ACTIVATION_FUNCTIONS_H
 #define C_VERSION_ACTIVATION_FUNCTIONS_H
 
-#endif //C_VERSION_ACTIVATION_FUNCTIONS_H
-
 #include "../matrix_operations.h"
 
 double sigmoid(double x);
@@ -28,3 +26,6 @@ double leakyReLU_derivative(double x, double slope);
 double ReLU(double x);
 
 double ReLU_derivative(double x);
+
+#endif //C_VERSION_ACTIVATION_FUNCTIONS_H
+
