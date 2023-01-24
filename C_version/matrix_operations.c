@@ -96,7 +96,7 @@ void matrix_free(matrix matrix_to_free) {
 void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(double)) {
     for (int i = 0; i < matrix_for_operation.i; i++) {
         for (int j = 0; j < matrix_for_operation.j; j++) {
-            matrix_for_operation.table[j][i] = func(matrix_for_operation.table[j][i]);
+            matrix_for_operation.table[i][j] = func(matrix_for_operation.table[i][j]);
         }
     }
 }
@@ -104,7 +104,7 @@ void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(dou
 void matrix_multiply_by_constant(matrix matrix_for_operation, double number) {
     for (int i = 0; i < matrix_for_operation.i; i++) {
         for (int j = 0; j < matrix_for_operation.j; j++) {
-            matrix_for_operation.table[j][i] = number * matrix_for_operation.table[j][i];
+            matrix_for_operation.table[i][j] = number * matrix_for_operation.table[i][j];
         }
     }
 }
