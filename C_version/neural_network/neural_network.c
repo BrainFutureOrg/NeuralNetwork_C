@@ -8,6 +8,7 @@
 #include "../matrix_operations.h"
 #include <limits.h>
 #include <string.h>
+#include <stdio.h>
 #include "network_activation_functions.h"
 
 void add_function_with_derivative(neural_network *network_layer, char *activation_function_name) {
@@ -51,30 +52,34 @@ network_start_layer create_network(int neuron_numbers) {
     return result;
 }
 
-void add_after_start_layer(network_start_layer network, int neuron_numbers, char *activation_function_name) {
-    network.next_layer = calloc(1, sizeof(neural_network*));
-    matrix weighs = matrix_creation(neuron_numbers, network.i);
+void add_after_start_layer(network_start_layer *network, int neuron_numbers, char *activation_function_name) {
+    network->next_layer = calloc(1, sizeof(neural_network*));
+    matrix weighs = matrix_creation(neuron_numbers, network->i);
     for (int i = 0; i < weighs.i; i++) {
         for (int j = 0; j < weighs.j; j++) {
-            weighs.table[i][j] = rand() / INT_MAX + 0.001;
+            weighs.table[i][j] = (double)random() / INT_MAX + 0.001;
         }
     }
-    network.next_layer->weights = weighs;
-    add_function_with_derivative(network.next_layer, activation_function_name);
+    network->next_layer->weights = weighs;
+    add_function_with_derivative(network->next_layer, activation_function_name);
 }
 
-void add_after_layer(network_start_layer network, int neuron_numbers, char *activation_function_name) {
-    neural_network *current = network.next_layer;
+void add_after_layer(network_start_layer *network, int neuron_numbers, char *activation_function_name) {
+//    srandom(42);
+    neural_network *current = network->next_layer;
     while (current->next_layer != NULL) {
         current = current->next_layer;
     }
-    current->next_layer = calloc(1, sizeof(neural_network*));
+    current->next_layer = calloc(1, sizeof(neural_network));
+//    printf("memory for next layer\n");
     matrix weighs = matrix_creation(neuron_numbers, current->weights.i);
     for (int i = 0; i < weighs.i; i++) {
         for (int j = 0; j < weighs.j; j++) {
             weighs.table[i][j] = (double)random() / INT_MAX + 0.001;
         }
     }
+//    matrix_print(weighs);
+//    printf("Add weights\n");
     current->next_layer->weights = weighs;
 //    matrix_print(current->next_layer->weights);
 //    printf("Adding previous layer");
@@ -82,12 +87,14 @@ void add_after_layer(network_start_layer network, int neuron_numbers, char *acti
     add_function_with_derivative(current->next_layer, activation_function_name);
 }
 
-void add_layer(network_start_layer network, int neuron_numbers, char *activation_function_name) {
-    if (network.next_layer == NULL) {
+void add_layer(network_start_layer *network, int neuron_numbers, char *activation_function_name) {
+//    printf("add layer start\n");
+    if (network->next_layer == NULL) {
         add_after_start_layer(network, neuron_numbers, activation_function_name);
     } else {
         add_after_layer(network, neuron_numbers, activation_function_name);
     }
+//    printf("add layer end\n");
 }
 
 int count_hidden_layers(network_start_layer network) {
@@ -106,16 +113,23 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
     matrix *current_results = calloc(layers_number + 1, sizeof(matrix));
     current_results[0] = start_layer;
     for (int i = 1; i < layers_number + 1; i++) {
+        printf("Step\n");
         current_results[i] = matrix_multiplication(current->weights, current_results[i - 1]);
+        printf("multuply %lu\n", current->activation_function);
+        matrix_print(current_results[i]);
         current->activation_function(&current_results[i]);
+        printf("activate\n");
         current = current->next_layer;
+        printf("Step end\n");
     }
     return current_results;
 }
 
 void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer) { //UNSURE
     int layer_number = count_hidden_layers(network);
+    printf("layer number = %d\n", layer_number);
     matrix *prediction = predict_all_layers(network, start_layer);
+    printf("predicted\n");
     matrix errors = matrix_substact(result_layer, prediction[layer_number]);
     matrix distributed_error = errors;
     neural_network *current = last_layer(network);
@@ -145,7 +159,9 @@ void print_network(network_start_layer network){
 matrix predict(network_start_layer network, matrix start_layer) {
     neural_network *current = network.next_layer;
     matrix current_results = start_layer;
+    printf("Step0\n");
     while (current != NULL) {
+        printf("Step\n");
         current_results = matrix_multiplication(current->weights, current_results);
         current->activation_function(&current_results);
         current = current->next_layer;
