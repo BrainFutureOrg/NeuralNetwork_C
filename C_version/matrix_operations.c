@@ -112,14 +112,9 @@ void matrix_multiply_by_constant(matrix matrix_for_operation, double number) {
 matrix make_matrix_from_array(const double *double_array, int i, int j) {
     matrix result;
     result = matrix_creation(i, j);
-    printf("Hello\n");
     for (int iterator = 0; iterator < i; iterator++) {
         for (int iterator1 = 0; iterator1 < j; iterator1++) {
-            printf("Hello\n");
-//            result.table[0][0]=0;
-            printf("%f %d %d\n",*(double_array + iterator * i + iterator1), result.i, result.j);
-            printf("%lu\n", result.table);
-            result.table[iterator][iterator1] = *(double_array + iterator * i + iterator1);
+            result.table[iterator][iterator1] = *(double_array + iterator * j + iterator1);
         }
     }
     return result;

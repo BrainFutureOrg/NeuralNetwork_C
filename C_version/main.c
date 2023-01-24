@@ -11,10 +11,14 @@ void check_matrix_print();
 
 void check_matrix_multiplication();
 
+void check_learning();
+
 int main() {
     printf("Ok-3");
     srand(time(NULL));
-    check_matrix_print();
+//    check_matrix_print();
+    printf("Ok-2");
+    check_learning();
     return 0;
 }
 
@@ -26,9 +30,7 @@ void check_matrix_print() {
     int size1 = sizeof(matrix1) / sizeof(matrix1[0]);
     int size2 = sizeof(matrix1[0]) / sizeof(matrix1[0][0]);
     matrix checking;
-    printf("Hello\n");
     checking = make_matrix_from_array(&matrix1[0][0], size1, size2);
-    printf("Hello\n");
     matrix_print(checking);
 //    matrix_free(checking);
     matrix checkingT = matrix_transposition(checking);
@@ -68,6 +70,7 @@ void check_matrix_multiplication() {
     matrix_free(checking);
 }
 void check_learning(){
+    printf("Ok-1");
     network_start_layer network = create_network(4);
     printf("Ok0");
     add_layer(network, 5, "Sigmoid");
