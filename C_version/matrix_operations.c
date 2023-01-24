@@ -51,7 +51,7 @@ matrix matrix_creation(int i, int j) {
     result.j = j;
     result.table = calloc(i, sizeof(double *));
     for (int iterator = 0; iterator < i; iterator++) {
-        result.table[i] = calloc(j, sizeof(double));
+        result.table[iterator] = calloc(j, sizeof(double));
     }
     return result;
 }
