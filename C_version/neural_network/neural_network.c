@@ -71,11 +71,14 @@ void add_after_layer(network_start_layer network, int neuron_numbers, char *acti
     current->next_layer = calloc(1, sizeof(neural_network*));
     matrix weighs = matrix_creation(neuron_numbers, current->weights.i);
     for (int i = 0; i < weighs.i; i++) {
-        for (int j = 0; weighs.j; j++) {
-            weighs.table[i][j] = rand() / INT_MAX + 0.001;
+        for (int j = 0; j < weighs.j; j++) {
+            weighs.table[i][j] = (double)random() / INT_MAX + 0.001;
         }
     }
     current->next_layer->weights = weighs;
+//    matrix_print(current->next_layer->weights);
+//    printf("Adding previous layer");
+    current->next_layer->previous_layer=current;
     add_function_with_derivative(current->next_layer, activation_function_name);
 }
 
@@ -124,6 +127,18 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         matrix_multiply_by_constant(delta, learning_rate);
         current->weights = matrix_addition(current->weights, delta);
         distributed_error = matrix_multiplication(matrix_transposition(current->weights), distributed_error);
+        current=current->previous_layer;
+    }
+}
+
+void print_network(network_start_layer network){
+    printf("startlayer\n");
+    int i=0;
+    neural_network *current = network.next_layer;
+    while(current!=NULL){
+        i++;
+        printf("layer %d exists\n", i);
+        current=current->next_layer;
     }
 }
 
