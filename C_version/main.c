@@ -4,6 +4,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <time.h>
+//#include <math.h>
+#include "neural_network/neural_network.h"
 
 void check_matrix_print();
 
@@ -63,4 +65,13 @@ void check_matrix_multiplication() {
     matrix_free(matr);
     matrix_free(checking);
 }
-
+void check_learning(){
+    network_start_layer network = create_network(4);
+    add_layer(network, 5, "Sigmoid");
+    add_layer(network, 6, "ReLu");
+    add_layer(network, 5, "Tanh");
+    add_layer(network, 5, "Sigmoid");
+    add_layer(network, 4, "Softmax");
+    matrix inhuman_experiment= matrix_creation(4, 1);
+    //inhuman_experiment.table={{1.0},{0.5},{0.5},{1.0}};
+}
