@@ -35,6 +35,8 @@ matrix predict(network_start_layer network, matrix start_layer);
 
 double accuracy(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_accuracy);
 
+double small_accuracy(network_start_layer network, matrix start_layer, matrix answers);
+
 void print_network(network_start_layer network);
 
 #endif //C_VERSION_NEURAL_NETWORK_H

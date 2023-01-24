@@ -85,12 +85,13 @@ void check_learning() {
         table[i][0] = (i + 1) / 4.0;
     }
     inhuman_experiment.table = table;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 50; i++) {
         //printf("start learning\n");
         learn_step(network, 0.5, inhuman_experiment, inhuman_experiment);
         printf("ended learning step %d\n", i);
     }
     matrix_print(predict(network, inhuman_experiment));
+    printf("%f\n", small_accuracy(network, inhuman_experiment, inhuman_experiment));
     //print_network(network);
 }
 
