@@ -120,7 +120,7 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
 //        printf("Step\n");
         current_results[i] = matrix_multiplication(current->weights, current_results[i - 1]);
 //        printf("multuply %lu\n", current->activation_function);
-        matrix_print(current_results[i]);
+//        matrix_print(current_results[i]);
         current->activation_function(&current_results[i]);
 //        printf("activate\n");
         current = current->next_layer;
