@@ -32,6 +32,6 @@ void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(dou
 
 void matrix_multiply_by_constant(matrix matrix_for_operation, double number);
 
-matrix make_matrix_from_array(double **double_array, int i, int j);
+matrix make_matrix_from_array(const double *double_array, int i, int j);
 
 #endif //C_VERSION_MATRIX_OPERATIONS_H

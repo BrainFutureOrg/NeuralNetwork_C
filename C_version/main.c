@@ -25,8 +25,9 @@ void check_matrix_print() {
     int size1 = sizeof(matrix1) / sizeof(matrix1[0]);
     int size2 = sizeof(matrix1[0]) / sizeof(matrix1[0][0]);
     matrix checking;
-    checking = make_matrix_from_array(matrix1, size1, size2);
-
+    printf("Hello\n");
+    checking = make_matrix_from_array(&matrix1[0][0], size1, size2);
+    printf("Hello\n");
     matrix_print(checking);
 //    matrix_free(checking);
     matrix checkingT = matrix_transposition(checking);
