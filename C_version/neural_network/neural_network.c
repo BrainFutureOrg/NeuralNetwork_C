@@ -55,7 +55,7 @@ void add_after_start_layer(network_start_layer network, int neuron_numbers, char
     network.next_layer = calloc(1, sizeof(neural_network*));
     matrix weighs = matrix_creation(neuron_numbers, network.i);
     for (int i = 0; i < weighs.i; i++) {
-        for (int j = 0; weighs.j; j++) {
+        for (int j = 0; j < weighs.j; j++) {
             weighs.table[i][j] = rand() / INT_MAX + 0.001;
         }
     }

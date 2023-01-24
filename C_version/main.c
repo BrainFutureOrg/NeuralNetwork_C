@@ -14,10 +14,8 @@ void check_matrix_multiplication();
 void check_learning();
 
 int main() {
-    printf("Ok-3");
     srand(time(NULL));
 //    check_matrix_print();
-    printf("Ok-2");
     check_learning();
     return 0;
 }
@@ -70,15 +68,12 @@ void check_matrix_multiplication() {
     matrix_free(checking);
 }
 void check_learning(){
-    printf("Ok-1");
     network_start_layer network = create_network(4);
-    printf("Ok0");
     add_layer(network, 5, "Sigmoid");
     add_layer(network, 6, "ReLu");
     add_layer(network, 5, "Tanh");
     add_layer(network, 5, "Sigmoid");
     add_layer(network, 4, "Sigmoid");
-    printf("Ok1");
     matrix inhuman_experiment= matrix_creation(4, 1);
     double** table=calloc(4, sizeof (double *));
     for(int i=0; i<4; i++){
@@ -88,7 +83,7 @@ void check_learning(){
     inhuman_experiment.table=table;
     for(int i=0; i<100; i++){
         learn_step(network, 0.05, inhuman_experiment, inhuman_experiment);
-        printf("ended learning step %d", i);
+        printf("ended learning step %d\n", i);
     }
     matrix_print(predict(network, inhuman_experiment));
 }
