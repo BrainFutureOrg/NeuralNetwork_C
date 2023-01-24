@@ -75,7 +75,7 @@ void check_learning() {
     add_layer(&network, 6, "ReLu");
     add_layer(&network, 5, "Tanh");
     add_layer(&network, 5, "Sigmoid");
-    add_layer(&network, 4, "Softmax");
+    add_layer(&network, 4, "Sigmoid");
     //printf("end creating network\n");
     //print_network(network);
     matrix inhuman_experiment = matrix_creation(4, 1);
@@ -87,11 +87,11 @@ void check_learning() {
     inhuman_experiment.table = table;
     for (int i = 0; i < 1000; i++) {
         //printf("start learning\n");
-        learn_step(network, 0.05, inhuman_experiment, inhuman_experiment);
+        learn_step(network, 0.5, inhuman_experiment, inhuman_experiment);
         printf("ended learning step %d\n", i);
     }
     matrix_print(predict(network, inhuman_experiment));
-    print_network(network);
+    //print_network(network);
 }
 
 //void check_network_exists(){
