@@ -52,7 +52,7 @@ network_start_layer create_network(int neuron_numbers) {
 }
 
 void add_after_start_layer(network_start_layer network, int neuron_numbers, char *activation_function_name) {
-    network.next_layer = calloc(1, sizeof(neural_network));
+    network.next_layer = calloc(1, sizeof(neural_network*));
     matrix weighs = matrix_creation(neuron_numbers, network.i);
     for (int i = 0; i < weighs.i; i++) {
         for (int j = 0; weighs.j; j++) {
@@ -68,7 +68,7 @@ void add_after_layer(network_start_layer network, int neuron_numbers, char *acti
     while (current->next_layer != NULL) {
         current = current->next_layer;
     }
-    current->next_layer = calloc(1, sizeof(neural_network));
+    current->next_layer = calloc(1, sizeof(neural_network*));
     matrix weighs = matrix_creation(neuron_numbers, current->weights.i);
     for (int i = 0; i < weighs.i; i++) {
         for (int j = 0; weighs.j; j++) {
