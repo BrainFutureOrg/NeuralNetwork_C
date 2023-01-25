@@ -8,7 +8,9 @@
 
 matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
     matrix result;
+    double restriction = 500;
     if (first_matrix.j != second_matrix.i) {
+        printf("ERRNO (matr mult firstmatrix j = %d, secondmatrix i = %d)", first_matrix.j, second_matrix.i);
         errno = ERANGE;
         result.i = result.j = 0;
         return result;
@@ -19,6 +21,8 @@ matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
             result.table[i][j] = 0;
             for (int i2 = 0; i2 < first_matrix.j; i2++) {
                 result.table[i][j] += first_matrix.table[i][i2] * second_matrix.table[i2][j];
+                //if (result.table[i][j] > restriction)result.table[i][j] = restriction;
+                //if (result.table[i][j] < -restriction)result.table[i][j] = restriction;
             }
         }
     }
@@ -30,6 +34,8 @@ matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
 matrix matrix_addition(matrix first_matrix, matrix second_matrix) {
     matrix result;
     if (first_matrix.i != second_matrix.i || first_matrix.j != second_matrix.j) {
+        printf("matr add firstmatrix %d x %d secondmatrix %d x %d", first_matrix.i, first_matrix.j, second_matrix.i,
+               second_matrix.j);
         errno = ERANGE;
         result.i = result.j = 0;
         return result;

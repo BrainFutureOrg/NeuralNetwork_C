@@ -109,6 +109,7 @@ int count_hidden_layers(network_start_layer network) {
 }
 
 matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
+    //double restriction = 100000;
     int layers_number = count_hidden_layers(network);
     neural_network *current = network.next_layer;
     matrix *current_results = calloc(layers_number + 1, sizeof(matrix));
@@ -124,6 +125,7 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
 //        printf("multuply %lu\n", current->activation_function);
 //        matrix_print(current_results[i]);
         current->activation_function(&current_results[i]);
+        //matrix_restrict(current_results[i], restriction);
 //        printf("activate\n");
         current = current->next_layer;
 //        printf("Step end\n");

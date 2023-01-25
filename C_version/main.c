@@ -179,6 +179,7 @@ void check_matrix_multiplication() {
     matrix_free(checking);
 }
 
+
 void check_learning() {
     network_start_layer network = create_network(4);
     //printf("start creating network\n");
