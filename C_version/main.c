@@ -7,17 +7,34 @@
 //#include <math.h>
 #include "neural_network/neural_network.h"
 
+#define check_error_void if(errno!=0) return;
+#define check_error_main if(errno!=0) { print_error(); return 0; }
+
 void check_matrix_print();
 
 void check_matrix_multiplication();
 
 void check_learning();
 
+void print_error();
+
 int main() {
     srandom(time(NULL));
 //    check_matrix_print();
     check_learning();
+    check_error_main
     return 0;
+}
+
+void print_error() {
+    switch (errno) {
+        case ERANGE:
+            printf("ERANGE");
+            break;
+        default:
+            printf("ERROR\n");
+            break;
+    }
 }
 
 void check_matrix_print() {
@@ -78,7 +95,9 @@ void check_learning() {
     add_layer(&network, 4, "Sigmoid");
     //printf("end creating network\n");
     //print_network(network);
-    matrix inhuman_experiment = matrix_creation(4, 1);
+    matrix inhuman_experiment;
+    inhuman_experiment.i = 4;
+    inhuman_experiment.j = 1;
     double **table = calloc(4, sizeof(double *));
     for (int i = 0; i < 4; i++) {
         table[i] = calloc(1, sizeof(double));
@@ -90,9 +109,13 @@ void check_learning() {
         learn_step(network, 0.5, inhuman_experiment, inhuman_experiment);
         printf("ended learning step %d\n", i);
     }
-    matrix_print(predict(network, inhuman_experiment));
+    matrix prediction = predict(network, inhuman_experiment);
+    matrix_print(prediction);
+    matrix_free(prediction);
     printf("%f\n", small_accuracy(network, inhuman_experiment, inhuman_experiment));
     //print_network(network);
+    free_network(network);
+    matrix_free(inhuman_experiment);
 }
 
 //void check_network_exists(){

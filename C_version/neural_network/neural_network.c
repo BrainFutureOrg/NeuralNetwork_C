@@ -68,25 +68,19 @@ void add_after_start_layer(network_start_layer *network, int neuron_numbers, cha
 }
 
 void add_after_layer(network_start_layer *network, int neuron_numbers, char *activation_function_name) {
-//    srandom(42);
     neural_network *current = network->next_layer;
     while (current->next_layer != NULL) {
         current = current->next_layer;
     }
     current->next_layer = calloc(1, sizeof(neural_network));
-//    printf("memory for next layer\n");
     matrix weighs = matrix_creation(neuron_numbers, current->weights.i);
     for (int i = 0; i < weighs.i; i++) {
         for (int j = 0; j < weighs.j; j++) {
             weighs.table[i][j] = (double) random() / INT_MAX + 0.001;
         }
     }
-//    matrix_print(weighs);
-//    printf("Add weights\n");
     current->next_layer->weights = weighs;
     current->next_layer->next_layer = NULL;
-//    matrix_print(current->next_layer->weights);
-//    printf("Adding previous layer");
     current->next_layer->previous_layer = current;
     add_function_with_derivative(current->next_layer, activation_function_name);
 }
@@ -147,6 +141,9 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         distributed_error = matrix_multiplication(matrix_transposition(current->weights), distributed_error);
         current = current->previous_layer;
     }
+    matrix_free(distributed_error);
+//    matrix_free(prediction[0]);
+    free(prediction);
 }
 
 void print_network(network_start_layer network) {
@@ -162,11 +159,18 @@ void print_network(network_start_layer network) {
 
 matrix predict(network_start_layer network, matrix start_layer) {
     neural_network *current = network.next_layer;
+    int i = 0;
     matrix current_results = start_layer;
 //    printf("Step0\n");
     while (current != NULL) {
 //        printf("Step\n");
-        current_results = matrix_multiplication(current->weights, current_results);
+        matrix multiplication = matrix_multiplication(current->weights, current_results);
+        if (i != 0) {
+            matrix_free(current_results);
+        } else {
+            i++;
+        }
+        current_results = multiplication;
         current->activation_function(&current_results);
         current = current->next_layer;
     }
@@ -179,6 +183,7 @@ double small_accuracy(network_start_layer network, matrix start_layer, matrix an
     for (int i = 0; i < answers.i; i++) {
         accuracy += fabs(answers.table[i][0] - prediction.table[i][0]) / prediction.table[i][0] / answers.i;
     }
+    matrix_free(prediction);
     return 1 - accuracy;
 }
 
