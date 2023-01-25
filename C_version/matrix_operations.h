@@ -34,4 +34,8 @@ void matrix_multiply_by_constant(matrix matrix_for_operation, double number);
 
 matrix make_matrix_from_array(const double *double_array, int i, int j);
 
+matrix create_vector(int feach_num, int this);
+
+void matrix_restrict(matrix matrix_for_operation, double limit);
+
 #endif //C_VERSION_MATRIX_OPERATIONS_H

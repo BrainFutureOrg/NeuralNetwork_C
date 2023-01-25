@@ -6,6 +6,7 @@
 #include <time.h>
 //#include <math.h>
 #include "neural_network/neural_network.h"
+#include "data/DAO.h"
 
 #define check_error_void if(errno!=0) return;
 #define check_error_main if(errno!=0) { print_error(); return 0; }
@@ -18,12 +19,105 @@ void check_learning();
 
 void print_error();
 
+void check_DAO();
+
+void try_train_network();
+
+network_start_layer initialise_network() {
+    network_start_layer network = create_network(28 * 28);
+    add_layer(&network, 200, "ReLu");
+    add_layer(&network, 150, "Sigmoid");
+    add_layer(&network, 150, "Sigmoid");
+    add_layer(&network, 70, "Sigmoid");
+    add_layer(&network, 10, "Softmax");
+    return network;
+}
+
 int main() {
     srandom(time(NULL));
 //    check_matrix_print();
-    check_learning();
+//    check_learning();
+//    check_DAO();
+    try_train_network();
     check_error_main
     return 0;
+}
+
+void check_DAO() {
+    readline("mnist_train.csv");
+    FILE *file = open_file("mnist_train.csv");
+    pass_line(file);
+    for (int p = 0; p < 4; ++p) {
+        double *numbers = get_line_matrix(file);
+        printf("%.0lf\n", numbers[0]);
+        for (int i = 0; i < 28; ++i) {
+            for (int j = 0; j < 28; ++j) {
+                printf("%3.0lf ", numbers[i * 28 + j + 1]);
+            }
+            printf("\n");
+
+        }
+        printf("\n");
+    }
+
+}
+
+double func_for_matrix(double num) {
+    return num + 0.05;
+}
+
+void try_train_network() {
+    network_start_layer MNIST_network = initialise_network();
+    FILE *file = open_file("mnist_train.csv");
+    pass_line(file);
+    for (int p = 0; p < 6000; ++p) {
+        double *numbers = get_line_matrix(file);
+        matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
+        matrix answer_vector = create_vector(10, (int) numbers[0]);
+        matrix_multiply_by_constant(matrix_numbers, 1. / 256);
+        matrix_function_to_elements(matrix_numbers, func_for_matrix);
+//        print_network()
+        learn_step(MNIST_network, 0.1, matrix_numbers, answer_vector);
+//        if (errno != 0) {
+//            matrix_print(matrix_numbers);
+//            printf("\n");
+//            matrix_print(answer_vector);
+//            printf("%d i_answer %d j_answer %d i_matrix %d j_matrix %d\n", p, answer_vector.i, answer_vector.j,
+//                   matrix_numbers.i, matrix_numbers.j);
+//            return;
+//        }
+        free(numbers);
+        matrix_free(matrix_numbers);
+        matrix_free(answer_vector);
+    }
+    fclose(file);
+
+
+    file = open_file("mnist_test.csv");
+    pass_line(file);
+    int has_result = 0;
+    double result;
+    int test_number = 100;
+    for (int p = 0; p < test_number; ++p) {
+        double *numbers = get_line_matrix(file);
+        matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
+        matrix answer_vector = create_vector(10, (int) numbers[0]);
+        if (has_result != 0) {
+            printf("right - %f predicted - \n", numbers[0]);
+            matrix_print(predict(MNIST_network, matrix_numbers));
+            result += small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
+        } else {
+            result = small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
+            has_result++;
+        }
+        free(numbers);
+        matrix_free(matrix_numbers);
+        matrix_free(answer_vector);
+    }
+    printf("accuracy = %lf\n", result);
+    fclose(file);
+
+    free_network(MNIST_network);
 }
 
 void print_error() {

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "network_activation_functions.h"
+#include <errno.h>
 
 void add_function_with_derivative(neural_network *network_layer, char *activation_function_name) {
     if (strcmp(activation_function_name, "Sigmoid") == 0) {
@@ -115,6 +116,11 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
     for (int i = 1; i < layers_number + 1; i++) {
 //        printf("Step\n");
         current_results[i] = matrix_multiplication(current->weights, current_results[i - 1]);
+        //matrix_restrict(current_results[i], restriction);//!
+        //printf("errno mm = %d\n", errno);
+        //printf("result %d x %d weights %d x %d\n", current_results[i - 1].i, current_results[i - 1].j,
+//               current->weights.i,
+//               current->weights.j);
 //        printf("multuply %lu\n", current->activation_function);
 //        matrix_print(current_results[i]);
         current->activation_function(&current_results[i]);
@@ -125,13 +131,21 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
     return current_results;
 }
 
-void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer) { //UNSURE
+void learn_step(network_start_layer network, double learning_rate, matrix start_layer,
+                matrix result_layer/*, double restriction*/) { //UNSURE
+    //double restriction = 1000;
+    //printf("errno = %d\n", errno);
+//    matrix_print(start_layer);
+//    matrix_print(result_layer);
+//    print_network(network);
     int layer_number = count_hidden_layers(network);
+//    printf("errno = %d", errno);
     matrix *prediction = predict_all_layers(network, start_layer);
-    //matrix errors = matrix_substact(result_layer, prediction[layer_number]);
+//    printf("errno = %d", errno);
     matrix distributed_error = matrix_substact(result_layer, prediction[layer_number]);
     neural_network *current = last_layer(network);
     for (int i = layer_number; i > 0; i--) {
+//        printf("errno = %d", errno);
         matrix derived_results = matrix_multiplication(current->weights, prediction[i - 1]);
         current->activation_function_derivative(&derived_results);
         matrix tmatrix = matrix_transposition(prediction[i - 1]);
@@ -142,7 +156,7 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         matrix weights = current->weights;
         current->weights = matrix_addition(weights, delta);
         matrix_free(weights);
-        //matrix_free(distributed_error);
+        //matrix_restrict(current->weights, restriction);
         tmatrix = matrix_transposition(current->weights);
         matrix distributed_error2 = matrix_multiplication(tmatrix,
                                                           distributed_error);
@@ -155,7 +169,6 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         matrix_free(prediction[i]);
     }
     matrix_free(distributed_error);
-//    matrix_free(prediction[0]);
     free(prediction);
 }
 

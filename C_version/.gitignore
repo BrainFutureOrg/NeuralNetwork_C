@@ -99,3 +99,7 @@ fabric.properties
 
 # custom, from our experience
 /cmake-build-debug/
+
+# data ignoring
+cmake-build-debug/mnist_test.csv
+cmake-build-debug/mnist_train.csv

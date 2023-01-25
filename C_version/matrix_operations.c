@@ -137,3 +137,20 @@ matrix matrix_multiplication_elements(matrix first_matrix, matrix second_matrix)
     }
     return result;
 }
+
+matrix create_vector(int feach_num, int this) {
+    matrix result = matrix_creation(feach_num, 1);
+    for (int i = 0; i < feach_num; ++i) {
+        result.table[i][0] = i == this ? 1 : 0;
+    }
+    return result;
+}
+
+void matrix_restrict(matrix matrix_for_operation, double limit) {
+    for (int i = 0; i < matrix_for_operation.i; i++) {
+        for (int j = 0; j < matrix_for_operation.j; j++) {
+            if (matrix_for_operation.table[i][j] > limit)matrix_for_operation.table[i][j] = limit;
+            if (matrix_for_operation.table[i][j] < -limit)matrix_for_operation.table[i][j] = -limit;
+        }
+    }
+}

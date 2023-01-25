@@ -28,5 +28,7 @@ double ReLU(double x);
 
 double ReLU_derivative(double x);
 
+matrix create_vector(int feach_num, int this);
+
 #endif //C_VERSION_ACTIVATION_FUNCTIONS_H
 
