@@ -39,4 +39,6 @@ double small_accuracy(network_start_layer network, matrix start_layer, matrix an
 
 void print_network(network_start_layer network);
 
+void free_network(network_start_layer startLayer);
+
 #endif //C_VERSION_NEURAL_NETWORK_H

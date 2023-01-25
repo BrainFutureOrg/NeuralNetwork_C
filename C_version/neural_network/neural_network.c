@@ -62,6 +62,7 @@ void add_after_start_layer(network_start_layer *network, int neuron_numbers, cha
         }
     }
     network->next_layer->weights = weighs;
+    //matrix_free(weighs);
     network->next_layer->next_layer = NULL;
     network->next_layer->previous_layer = NULL;
     add_function_with_derivative(network->next_layer, activation_function_name);
@@ -80,6 +81,7 @@ void add_after_layer(network_start_layer *network, int neuron_numbers, char *act
         }
     }
     current->next_layer->weights = weighs;
+    //matrix_free(weighs);
     current->next_layer->next_layer = NULL;
     current->next_layer->previous_layer = current;
     add_function_with_derivative(current->next_layer, activation_function_name);
@@ -125,21 +127,32 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
 
 void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer) { //UNSURE
     int layer_number = count_hidden_layers(network);
-    //printf("layer number = %d\n", layer_number);
     matrix *prediction = predict_all_layers(network, start_layer);
-    //printf("predicted\n");
-    matrix errors = matrix_substact(result_layer, prediction[layer_number]);
-    matrix distributed_error = errors;
+    //matrix errors = matrix_substact(result_layer, prediction[layer_number]);
+    matrix distributed_error = matrix_substact(result_layer, prediction[layer_number]);
     neural_network *current = last_layer(network);
     for (int i = layer_number; i > 0; i--) {
         matrix derived_results = matrix_multiplication(current->weights, prediction[i - 1]);
         current->activation_function_derivative(&derived_results);
+        matrix tmatrix = matrix_transposition(prediction[i - 1]);
         matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
-                                             matrix_transposition(prediction[i - 1]));
+                                             tmatrix);
+        matrix_free(tmatrix);
         matrix_multiply_by_constant(delta, learning_rate);
-        current->weights = matrix_addition(current->weights, delta);
-        distributed_error = matrix_multiplication(matrix_transposition(current->weights), distributed_error);
+        matrix weights = current->weights;
+        current->weights = matrix_addition(weights, delta);
+        matrix_free(weights);
+        //matrix_free(distributed_error);
+        tmatrix = matrix_transposition(current->weights);
+        matrix distributed_error2 = matrix_multiplication(tmatrix,
+                                                          distributed_error);
+        matrix_free(tmatrix);
+        matrix_free(distributed_error);
+        distributed_error = distributed_error2;
         current = current->previous_layer;
+        matrix_free(derived_results);
+        matrix_free(delta);
+        matrix_free(prediction[i]);
     }
     matrix_free(distributed_error);
 //    matrix_free(prediction[0]);
@@ -193,4 +206,15 @@ double accuracy(network_start_layer network, matrix *start_layers, matrix *answe
         accuracy += small_accuracy(network, start_layers[i], answers[i]) / len_of_accuracy;
     }
     return accuracy;
+}
+
+void free_network(network_start_layer network) {
+    neural_network *current = network.next_layer;
+    while (current != NULL) {
+        neural_network *current2 = current->next_layer;
+        matrix_free(current->weights);
+        free(current);
+        current = current2;
+    }
+    network.next_layer = NULL;
 }
