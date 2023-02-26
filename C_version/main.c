@@ -69,36 +69,44 @@ double func_for_matrix(double num) {
 void try_train_network() {
 
     network_start_layer MNIST_network = initialise_network();
-    FILE *file = open_file("mnist_train.csv");
+    FILE *file;
 
+    int test_numbers = 20;
 
-    pass_line(file);
-    for (int p = 0; p < 600; ++p) {
-        double *numbers = get_line_matrix(file);
-        matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
-        matrix answer_vector = create_vector(10, (int) numbers[0]);
-        matrix_multiply_by_constant(matrix_numbers, 1. / 256);
-        matrix_function_to_elements(matrix_numbers, func_for_matrix);
+//    pass_line(file);
+    for (int p = 0; p < 1000; ++p) {
+        file = open_file("mnist_train.csv");
+        pass_line(file);
+        for (int w = 0; w < test_numbers; w++) {
+            double *numbers = get_line_matrix(file);
+//        matrix_print(matrix_numbers);
+            matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
+            matrix answer_vector = create_vector(10, (int) numbers[0]);
+            matrix_multiply_by_constant(matrix_numbers, 1. / 256);
+            matrix_function_to_elements(matrix_numbers, func_for_matrix);
 //        print_network()
-        learn_step(MNIST_network, 0.1, matrix_numbers, answer_vector);
+            learn_step(MNIST_network, 0.0000008, matrix_numbers, answer_vector);
 //        if (errno != 0) {
-//            matrix_print(matrix_numbers);
+//        matrix_print(matrix_numbers);
 //            printf("\n");
 //            matrix_print(answer_vector);
 //            printf("%d i_answer %d j_answer %d i_matrix %d j_matrix %d\n", p, answer_vector.i, answer_vector.j,
 //                   matrix_numbers.i, matrix_numbers.j);
 //            return;
 //        }
-        free(numbers);
-        matrix_free(matrix_numbers);
-        matrix_free(answer_vector);
+            free(numbers);
+            matrix_free(matrix_numbers);
+            matrix_free(answer_vector);
+            printf("%d ", w);
+        }
+        printf("\nended epoch %d\n", p);
+        fclose(file);
     }
-    fclose(file);
 
 
-    file = open_file("mnist_test.csv");
+    file = open_file("mnist_train.csv");
     pass_line(file);
-    int has_result = 0;
+    int has_result = 1;
     double result;
     int test_number = 100;
     for (int p = 0; p < test_number; ++p) {
@@ -217,7 +225,7 @@ void check_learning() {
         learn_step(network, 0.005, inhuman_experiment2, inhuman_experiment2);
         printf("ended learning step %d\n", i);
         //just accuracy
-        printf("\nepoch %d\n",i);
+        printf("\nepoch %d\n", i);
         printf("\n%f\n", small_accuracy(network, inhuman_experiment, inhuman_experiment));
         printf("\n%f\n", small_accuracy(network, inhuman_experiment2, inhuman_experiment2));
     }

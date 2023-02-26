@@ -12,6 +12,8 @@
 #include "network_activation_functions.h"
 #include <errno.h>
 
+#define EPSILON 0.00005
+
 void add_function_with_derivative(neural_network *network_layer, char *activation_function_name) {
     if (strcmp(activation_function_name, "Sigmoid") == 0) {
         network_layer->activation_function = network_sigmoid;
@@ -109,26 +111,17 @@ int count_hidden_layers(network_start_layer network) {
 }
 
 matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
-    //double restriction = 100000;
     int layers_number = count_hidden_layers(network);
     neural_network *current = network.next_layer;
     matrix *current_results = calloc(layers_number + 1, sizeof(matrix));
+    matrix activated_results = start_layer;
     current_results[0] = start_layer;
     for (int i = 1; i < layers_number + 1; i++) {
-//        printf("Step\n");
-        current_results[i] = matrix_multiplication(current->weights, current_results[i - 1]);
-        //matrix_restrict(current_results[i], restriction);//!
-        //printf("errno mm = %d\n", errno);
-        //printf("result %d x %d weights %d x %d\n", current_results[i - 1].i, current_results[i - 1].j,
-//               current->weights.i,
-//               current->weights.j);
-//        printf("multuply %lu\n", current->activation_function);
-//        matrix_print(current_results[i]);
-        current->activation_function(&current_results[i]);
-        //matrix_restrict(current_results[i], restriction);
-//        printf("activate\n");
+        current_results[i] = matrix_multiplication(current->weights, activated_results);
+//        matrix_free(activated_results);
+        activated_results = matrix_copy(current_results[i]);
+        current->activation_function(&activated_results);
         current = current->next_layer;
-//        printf("Step end\n");
     }
     return current_results;
 }
@@ -143,9 +136,13 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
     int layer_number = count_hidden_layers(network);
 //    printf("errno = %d", errno);
     matrix *prediction = predict_all_layers(network, start_layer);
-//    printf("errno = %d", errno);
-    matrix distributed_error = matrix_substact(result_layer, prediction[layer_number]);
     neural_network *current = last_layer(network);
+    matrix last_layer_prediction = prediction[layer_number];
+    current->activation_function(&last_layer_prediction);
+
+//    printf("errno = %d", errno);
+    matrix distributed_error = matrix_substact(result_layer, last_layer_prediction);
+
     for (int i = layer_number; i > 0; i--) {
 //        printf("errno = %d", errno);
         matrix derived_results = matrix_multiplication(current->weights, prediction[i - 1]);
@@ -209,7 +206,8 @@ double small_accuracy(network_start_layer network, matrix start_layer, matrix an
     double accuracy;
     matrix prediction = predict(network, start_layer);
     for (int i = 0; i < answers.i; i++) {
-        accuracy += fabs(answers.table[i][0] - prediction.table[i][0]) / prediction.table[i][0] / answers.i;
+        accuracy += fabs(answers.table[i][0] - prediction.table[i][0] + EPSILON) / (prediction.table[i][0] + EPSILON) /
+                    answers.i;
     }
     matrix_free(prediction);
     return 1 - accuracy;
