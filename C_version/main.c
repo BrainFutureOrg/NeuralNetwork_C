@@ -25,18 +25,18 @@ void try_train_network();
 
 network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
-    add_layer(&network, 200, "ReLu");
-    add_layer(&network, 150, "Sigmoid");
-    add_layer(&network, 150, "Sigmoid");
-    add_layer(&network, 70, "Sigmoid");
-    add_layer(&network, 10, "Softmax");
+    add_layer(&network, 600, "ReLu");
+    add_layer(&network, 460, "ReLu");
+    add_layer(&network, 300, "ReLu");
+    add_layer(&network, 100, "ReLu");
+    add_layer(&network, 10, "ReLu");
     return network;
 }
 
 int main() {
     srandom(time(NULL));
 //    check_matrix_print();
-//    check_learning();
+    //check_learning();
 //    check_DAO();
     try_train_network();
     check_error_main
@@ -67,10 +67,13 @@ double func_for_matrix(double num) {
 }
 
 void try_train_network() {
+
     network_start_layer MNIST_network = initialise_network();
     FILE *file = open_file("mnist_train.csv");
+
+
     pass_line(file);
-    for (int p = 0; p < 6000; ++p) {
+    for (int p = 0; p < 600; ++p) {
         double *numbers = get_line_matrix(file);
         matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
         matrix answer_vector = create_vector(10, (int) numbers[0]);
@@ -183,31 +186,54 @@ void check_matrix_multiplication() {
 void check_learning() {
     network_start_layer network = create_network(4);
     //printf("start creating network\n");
-    add_layer(&network, 5, "Sigmoid");
+    add_layer(&network, 5, "ReLu");
     add_layer(&network, 6, "ReLu");
-    add_layer(&network, 5, "Tanh");
-    add_layer(&network, 5, "Sigmoid");
-    add_layer(&network, 4, "Sigmoid");
+    //add_layer(&network, 5, "Tanh");
+    //add_layer(&network, 5, "Sigmoid");
+    add_layer(&network, 4, "ReLu");
     //printf("end creating network\n");
     //print_network(network);
     matrix inhuman_experiment;
+    matrix inhuman_experiment2;
     inhuman_experiment.i = 4;
     inhuman_experiment.j = 1;
+    inhuman_experiment2.i = 4;
+    inhuman_experiment2.j = 1;
     double **table = calloc(4, sizeof(double *));
     for (int i = 0; i < 4; i++) {
         table[i] = calloc(1, sizeof(double));
         table[i][0] = (i + 1) / 4.0;
     }
+    double **table2 = calloc(4, sizeof(double *));
+    for (int i = 0; i < 4; i++) {
+        table2[i] = calloc(1, sizeof(double));
+        table2[i][0] = (i + 1) / 8.0;
+    }
     inhuman_experiment.table = table;
-    for (int i = 0; i < 50; i++) {
+    inhuman_experiment2.table = table2;
+    for (int i = 0; i < 5000; i++) {
         //printf("start learning\n");
-        learn_step(network, 0.5, inhuman_experiment, inhuman_experiment);
+        learn_step(network, 0.005, inhuman_experiment, inhuman_experiment);
+        learn_step(network, 0.005, inhuman_experiment2, inhuman_experiment2);
         printf("ended learning step %d\n", i);
+        //just accuracy
+        printf("\nepoch %d\n",i);
+        printf("\n%f\n", small_accuracy(network, inhuman_experiment, inhuman_experiment));
+        printf("\n%f\n", small_accuracy(network, inhuman_experiment2, inhuman_experiment2));
     }
     matrix prediction = predict(network, inhuman_experiment);
     matrix_print(prediction);
     matrix_free(prediction);
+
+    matrix prediction2 = predict(network, inhuman_experiment2);
+    matrix_print(prediction2);
+    matrix_free(prediction2);
+
+
+    printf("\n\n");
+
     printf("%f\n", small_accuracy(network, inhuman_experiment, inhuman_experiment));
+    //printf("%f\n", small_accuracy(network, inhuman_experiment2, inhuman_experiment2));
     //print_network(network);
     free_network(network);
     matrix_free(inhuman_experiment);

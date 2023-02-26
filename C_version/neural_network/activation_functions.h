@@ -16,6 +16,10 @@ void softmax(matrix *M);
 
 void softmax_derivative(matrix *M);
 
+void softmax_stable(matrix *M);
+
+void softmax_derivative_stable(matrix *M);
+
 double tangential(double x);
 
 double tangential_derivative(double x);

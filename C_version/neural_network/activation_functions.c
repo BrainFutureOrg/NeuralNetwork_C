@@ -5,6 +5,8 @@
 #include "activation_functions.h"
 #include <math.h>
 #include "../matrix_operations.h"
+#include <limits.h>
+#include <float.h>
 
 double sigmoid(double x) {
     return 1 / (1 + exp(-x));
@@ -41,6 +43,37 @@ void softmax_derivative(matrix *M) {
 
 double tangential(double x) {
     return tanh(x);
+}
+
+void softmax_stable(matrix *M){
+    matrix result = matrix_creation(M->i, M->j);
+    double sum = 0;
+    double max=M->table[0][0];
+    for(int i=0; i<M->i; i++){
+        for(int j=0; j<M->j; j++){
+            if(max<M->table[i][j])max=M->table[i][j];
+        }
+    }
+    for (int i = 0; i < M->i; i++) {
+        for (int j = 0; j < M->j; j++) {
+            sum += exp(M->table[i][j]/max);
+        }
+    }
+    for (int i = 0; i < M->i; i++) {
+        for (int j = 0; j < M->j; j++) {
+            result.table[i][j] = exp(M->table[i][j]/max) / sum;
+        }
+    }
+    *M = result;
+}
+
+void softmax_derivative_stable(matrix *M){
+    softmax_stable(M);
+    for (int i = 0; i < M->i; i++) {
+        for (int j = 0; j < M->j; j++) {
+            M->table[i][j] -= pow(M->table[i][j], 2);
+        }
+    }
 }
 
 double tangential_derivative(double x) {
