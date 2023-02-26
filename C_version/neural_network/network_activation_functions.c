@@ -14,12 +14,12 @@ void network_sigmoid_derivative(matrix *M) {
     matrix_function_to_elements(*M, sigmoid_derivative);
 }
 
-void network_softmax(matrix *M) {
-    softmax(M);
+void network_softmax(matrix *M) {//stable
+    softmax_stable(M);
 }
 
-void network_softmax_derivative(matrix *M) {
-    softmax_derivative(M);
+void network_softmax_derivative(matrix *M) {//stable
+    softmax_derivative_stable(M);
 }
 
 void network_tangential(matrix *M) {

@@ -25,9 +25,9 @@ void try_train_network();
 
 network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
-    add_layer(&network, 600, "ReLu");
-    add_layer(&network, 460, "ReLu");
-    add_layer(&network, 300, "ReLu");
+    //add_layer(&network, 300, "ReLu");
+    //add_layer(&network, 460, "ReLu");
+    //add_layer(&network, 5, "ReLu");
     add_layer(&network, 100, "ReLu");
     add_layer(&network, 10, "ReLu");
     return network;
@@ -108,10 +108,14 @@ void try_train_network() {
     pass_line(file);
     int has_result = 1;
     double result;
-    int test_number = 100;
+    int test_number = 20;
     for (int p = 0; p < test_number; ++p) {
         double *numbers = get_line_matrix(file);
         matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
+        //new
+        matrix_multiply_by_constant(matrix_numbers, 1. / 256);
+        matrix_function_to_elements(matrix_numbers, func_for_matrix);
+        //end new
         matrix answer_vector = create_vector(10, (int) numbers[0]);
         if (has_result != 0) {
             printf("right - %f predicted - \n", numbers[0]);
@@ -219,7 +223,7 @@ void check_learning() {
     }
     inhuman_experiment.table = table;
     inhuman_experiment2.table = table2;
-    for (int i = 0; i < 5000; i++) {
+    for (int i = 0; i < 300; i++) {
         //printf("start learning\n");
         learn_step(network, 0.005, inhuman_experiment, inhuman_experiment);
         learn_step(network, 0.005, inhuman_experiment2, inhuman_experiment2);
