@@ -128,25 +128,19 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
 
 void learn_step(network_start_layer network, double learning_rate, matrix start_layer,
                 matrix result_layer/*, double restriction*/) { //UNSURE
-    //double restriction = 1000;
-    //printf("errno = %d\n", errno);
-//    matrix_print(start_layer);
-//    matrix_print(result_layer);
-//    print_network(network);
     int layer_number = count_hidden_layers(network);
-//    printf("errno = %d", errno);
     matrix *prediction = predict_all_layers(network, start_layer);
     neural_network *current = last_layer(network);
     matrix last_layer_prediction = prediction[layer_number];
     current->activation_function(&last_layer_prediction);
 
-//    printf("errno = %d", errno);
     matrix distributed_error = matrix_substact(result_layer, last_layer_prediction);
 
     for (int i = layer_number; i > 0; i--) {
-//        printf("errno = %d", errno);
-        matrix derived_results = matrix_multiplication(current->weights, prediction[i - 1]);
-        current->activation_function_derivative(&derived_results);
+        //matrix derived_results = matrix_multiplication(current->weights, prediction[i - 1]);
+        matrix derived_results = matrix_copy(prediction[i]);
+        //current->activation_function_derivative(&derived_results);//NO DELETE
+        current->activation_function_derivative(&prediction[i]);
         matrix tmatrix = matrix_transposition(prediction[i - 1]);
         matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
                                              tmatrix);
@@ -189,6 +183,8 @@ matrix predict(network_start_layer network, matrix start_layer) {
 //    printf("Step0\n");
     while (current != NULL) {
 //        printf("Step\n");
+        matrix_print(current->weights);
+        printf("\n\n");
         matrix multiplication = matrix_multiplication(current->weights, current_results);
         if (i != 0) {
             matrix_free(current_results);

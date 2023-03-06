@@ -71,8 +71,7 @@ void try_train_network() {
     network_start_layer MNIST_network = initialise_network();
     FILE *file;
 
-    int test_numbers = 20;
-
+    int test_numbers = 2;
 //    pass_line(file);
     for (int p = 0; p < 1000; ++p) {
         file = open_file("mnist_train.csv");
@@ -128,6 +127,7 @@ void try_train_network() {
         free(numbers);
         matrix_free(matrix_numbers);
         matrix_free(answer_vector);
+        printf("\n\n\n\n\n");
     }
     printf("accuracy = %lf\n", result);
     fclose(file);
