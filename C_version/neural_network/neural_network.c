@@ -165,7 +165,7 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         for (int i = 0; i < distributed_error.i; i++) {
             if (fabs(distributed_error.table[i][0]) > maxmodule) maxmodule = fabs(distributed_error.table[i][0]);
         }
-        matrix_multiply_by_constant(distributed_error, maxmodule);
+        matrix_multiply_by_constant(distributed_error, 1.0/maxmodule);
         current = current->previous_layer;
         matrix_free(derived_results);
         matrix_free(delta);
@@ -224,8 +224,8 @@ matrix predict(network_start_layer network, matrix start_layer) {
 //    printf("Step0\n");
     while (current != NULL) {
 //        printf("Step\n");
-        matrix_print(current->weights);
-        printf("\n\n");
+        //matrix_print(current->weights);
+        //printf("\n\n");
         matrix multiplication = matrix_multiplication(current->weights, current_results);
         if (i != 0) {
             matrix_free(current_results);
