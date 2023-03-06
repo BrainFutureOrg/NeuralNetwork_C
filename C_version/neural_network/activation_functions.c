@@ -8,6 +8,8 @@
 #include <limits.h>
 #include <float.h>
 
+#define RELU_PARAM 0.01
+
 double sigmoid(double x) {
     return 1 / (1 + exp(-x));
 }
@@ -89,9 +91,9 @@ double leakyReLU_derivative(double x, double slope) {
 }
 
 double ReLU(double x) {
-    return x > 0 ? x : 0;
+    return x > 0 ? x : x * RELU_PARAM;
 }
 
 double ReLU_derivative(double x) {
-    return x > 0 ? 1 : x < 0 ? 0 : 0.5;
+    return x > 0 ? 1 : x < 0 ? RELU_PARAM : 0.5 + RELU_PARAM / 2;
 }

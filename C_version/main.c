@@ -25,18 +25,18 @@ void try_train_network();
 
 network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
-    //add_layer(&network, 300, "ReLu");
+    add_layer(&network, 50, "ReLu");
     //add_layer(&network, 460, "ReLu");
     //add_layer(&network, 5, "ReLu");
-    add_layer(&network, 100, "ReLu");
-    add_layer(&network, 10, "ReLu");
+    //add_layer(&network, 50, "ReLu");
+    add_layer(&network, 10, "Sigmoid");
     return network;
 }
 
 int main() {
     srandom(time(NULL));
 //    check_matrix_print();
-    //check_learning();
+    // check_learning();
 //    check_DAO();
     try_train_network();
     check_error_main
@@ -73,7 +73,7 @@ void try_train_network() {
 
     int test_numbers = 2;
 //    pass_line(file);
-    for (int p = 0; p < 1000; ++p) {
+    for (int p = 0; p < 100; ++p) {
         file = open_file("mnist_train.csv");
         pass_line(file);
         for (int w = 0; w < test_numbers; w++) {
@@ -84,7 +84,7 @@ void try_train_network() {
             matrix_multiply_by_constant(matrix_numbers, 1. / 256);
             matrix_function_to_elements(matrix_numbers, func_for_matrix);
 //        print_network()
-            learn_step(MNIST_network, 0.0000008, matrix_numbers, answer_vector);
+            learn_step(MNIST_network, 0.000000005, matrix_numbers, answer_vector);
 //        if (errno != 0) {
 //        matrix_print(matrix_numbers);
 //            printf("\n");
@@ -107,7 +107,7 @@ void try_train_network() {
     pass_line(file);
     int has_result = 1;
     double result;
-    int test_number = 20;
+    int test_number = 2;
     for (int p = 0; p < test_number; ++p) {
         double *numbers = get_line_matrix(file);
         matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
@@ -223,7 +223,7 @@ void check_learning() {
     }
     inhuman_experiment.table = table;
     inhuman_experiment2.table = table2;
-    for (int i = 0; i < 300; i++) {
+    for (int i = 0; i < 40; i++) {
         //printf("start learning\n");
         learn_step(network, 0.005, inhuman_experiment, inhuman_experiment);
         learn_step(network, 0.005, inhuman_experiment2, inhuman_experiment2);

@@ -131,7 +131,7 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
     int layer_number = count_hidden_layers(network);
     matrix *prediction = predict_all_layers(network, start_layer);
     neural_network *current = last_layer(network);
-    matrix last_layer_prediction = prediction[layer_number];
+    matrix last_layer_prediction = matrix_copy(prediction[layer_number]);
     current->activation_function(&last_layer_prediction);
 
     matrix distributed_error = matrix_substact(result_layer, last_layer_prediction);
@@ -142,7 +142,12 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         //current->activation_function_derivative(&derived_results);//NO DELETE
         current->activation_function_derivative(&prediction[i]);
         matrix tmatrix = matrix_transposition(prediction[i - 1]);
-        matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
+        //new
+        if (i > 1)current->previous_layer->activation_function(&tmatrix);
+        //end new
+        //matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
+        //                                     tmatrix);//NO DDELETE
+        matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, prediction[i]),
                                              tmatrix);
         matrix_free(tmatrix);
         matrix_multiply_by_constant(delta, learning_rate);
@@ -156,13 +161,49 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         matrix_free(tmatrix);
         matrix_free(distributed_error);
         distributed_error = distributed_error2;
+        double maxmodule = fabs(distributed_error.table[0][0]);
+        for (int i = 0; i < distributed_error.i; i++) {
+            if (fabs(distributed_error.table[i][0]) > maxmodule) maxmodule = fabs(distributed_error.table[i][0]);
+        }
+        matrix_multiply_by_constant(distributed_error, maxmodule);
         current = current->previous_layer;
         matrix_free(derived_results);
         matrix_free(delta);
-        matrix_free(prediction[i]);
+        //matrix_free(prediction[i]);
+    }
+    for (int i = 0; i < layer_number; i++) {
+        //matrix_free(prediction[i]);
     }
     matrix_free(distributed_error);
     free(prediction);
+}
+
+
+void learn_step2(network_start_layer network, double learning_rate, matrix start_layer,
+                 matrix result_layer/*, double restriction*/) { //UNSURE
+    int layer_number = count_hidden_layers(network);
+    matrix *prediction = predict_all_layers(network, start_layer);
+    neural_network *current = last_layer(network);
+    matrix last_layer_prediction = prediction[layer_number];
+    current->activation_function(&last_layer_prediction);
+
+    matrix error = matrix_substact(result_layer, last_layer_prediction);
+
+}
+
+void learn_step3(network_start_layer network, double learning_rate, matrix start_layer,
+                 matrix result_layer/*, double restriction*/) {
+    int layer_number = count_hidden_layers(network);
+    matrix *prediction = predict_all_layers(network, start_layer);
+    neural_network *current = last_layer(network);
+    matrix last_layer_prediction = matrix_copy(prediction[layer_number]);
+    current->activation_function(&last_layer_prediction);
+
+    matrix distributed_error = matrix_substact(result_layer, last_layer_prediction);
+
+    matrix derivative = matrix_copy(prediction[layer_number]);
+    current->activation_function_derivative(&derivative);
+//    matrix delta = matrix_multiplication_elements(distributed_error, )
 }
 
 void print_network(network_start_layer network) {
