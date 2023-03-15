@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "matrix_operations.h"
+#include <math.h>
 
 matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
     matrix result;
@@ -159,4 +160,13 @@ void matrix_restrict(matrix matrix_for_operation, double limit) {
             if (matrix_for_operation.table[i][j] < -limit)matrix_for_operation.table[i][j] = -limit;
         }
     }
+}
+double l2norm(matrix matrix_for_operation){
+    double sum=0;
+    for(int i=0; i<matrix_for_operation.i; i++){
+        for(int j=0; j<matrix_for_operation.j; j++){
+            sum += pow(matrix_for_operation.table[i][j],2);
+        }
+    }
+    return sqrt(sum);
 }

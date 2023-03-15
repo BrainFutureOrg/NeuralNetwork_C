@@ -150,6 +150,9 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, prediction[i]),
                                              tmatrix);
         matrix_free(tmatrix);
+        //l2 normalisation
+        matrix_multiply_by_constant(delta, 1/l2norm(delta));
+        //
         matrix_multiply_by_constant(delta, learning_rate);
         matrix weights = current->weights;
         current->weights = matrix_addition(weights, delta);

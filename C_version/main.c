@@ -25,11 +25,11 @@ void try_train_network();
 
 network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
-    add_layer(&network, 500, "Sigmoid");
-    add_layer(&network, 200, "Sigmoid");
+    add_layer(&network, 500, "ReLu");
+    add_layer(&network, 200, "ReLu");
     //add_layer(&network, 5, "ReLu");
-    add_layer(&network, 60, "Sigmoid");
-    add_layer(&network, 10, "Sigmoid");
+    add_layer(&network, 60, "ReLu");
+    add_layer(&network, 10, "ReLu");
     return network;
 }
 
@@ -84,7 +84,7 @@ void try_train_network() {
             matrix_multiply_by_constant(matrix_numbers, 1. / 256);
             matrix_function_to_elements(matrix_numbers, func_for_matrix);
 //        print_network()
-            learn_step(MNIST_network, 0.05, matrix_numbers, answer_vector);
+            learn_step(MNIST_network, 0.005, matrix_numbers, answer_vector);
 //        if (errno != 0) {
 //        matrix_print(matrix_numbers);
 //            printf("\n");
