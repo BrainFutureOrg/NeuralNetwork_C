@@ -50,6 +50,8 @@ matrix matrix_addition(matrix first_matrix, matrix second_matrix) {
     return result;
 }
 
+
+
 #pragma endregion
 
 matrix matrix_creation(int i, int j) {

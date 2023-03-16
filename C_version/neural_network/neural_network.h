@@ -16,6 +16,8 @@ typedef struct network_start_layer {
 typedef struct neural_network {
     matrix weights;
 
+    matrix bias;
+
     void (*activation_function)(matrix *);
 
     void (*activation_function_derivative)(matrix *);

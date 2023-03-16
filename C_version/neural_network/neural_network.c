@@ -64,7 +64,15 @@ void add_after_start_layer(network_start_layer *network, int neuron_numbers, cha
             weighs.table[i][j] = (double) random() / INT_MAX + 0.001;
         }
     }
+
+    matrix bias = matrix_creation(neuron_numbers, 1);
+    for (int i = 0; i < bias.i; i++) {
+        bias.table[i][0] = (double) random() / INT_MAX + 0.001;
+    }
+
     network->next_layer->weights = weighs;
+    network->next_layer->bias = bias;
+    printf("%d\n",network->next_layer->bias.i);
     //matrix_free(weighs);
     network->next_layer->next_layer = NULL;
     network->next_layer->previous_layer = NULL;
@@ -83,6 +91,14 @@ void add_after_layer(network_start_layer *network, int neuron_numbers, char *act
             weighs.table[i][j] = (double) random() / INT_MAX + 0.001;
         }
     }
+
+    matrix bias = matrix_creation(neuron_numbers, 1);
+    for (int i = 0; i < bias.i; i++) {
+        bias.table[i][0] = (double) random() / INT_MAX + 0.001;
+    }
+    network->next_layer->bias = bias;
+    printf("%d %d %f\n",network->next_layer->bias.i, network->next_layer->bias.j, network->next_layer->bias.table[0][0]);
+
     current->next_layer->weights = weighs;
     //matrix_free(weighs);
     current->next_layer->next_layer = NULL;
@@ -120,6 +136,7 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
         current_results[i] = matrix_multiplication(current->weights, activated_results);
 //        matrix_free(activated_results);
         activated_results = matrix_copy(current_results[i]);
+//        printf("%d %d\n", current->bias.i, current->bias.j);
         current->activation_function(&activated_results);
         current = current->next_layer;
     }
@@ -145,16 +162,21 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         //new
         if (i > 1)current->previous_layer->activation_function(&tmatrix);
         //end new
-        //matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
+        //matrix delta_weights = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
         //                                     tmatrix);//NO DDELETE
-        matrix delta = matrix_multiplication(matrix_multiplication_elements(distributed_error, prediction[i]),
-                                             tmatrix);
+        matrix delta = matrix_multiplication_elements(distributed_error, prediction[i]);
+        matrix bias = matrix_addition(delta, current->bias);
+//        matrix_free(current->bias);
+        current->bias = bias;
+
+        matrix delta_weights = matrix_multiplication(delta,
+                                                     tmatrix);
         matrix_free(tmatrix);
         //l2 normalisation
         //
-        matrix_multiply_by_constant(delta, learning_rate);
+        matrix_multiply_by_constant(delta_weights, learning_rate);
         matrix weights = current->weights;
-        current->weights = matrix_addition(weights, delta);
+        current->weights = matrix_addition(weights, delta_weights);
         matrix_free(weights);
         //matrix_restrict(current->weights, restriction);
         tmatrix = matrix_transposition(current->weights);
@@ -165,7 +187,7 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         distributed_error = distributed_error2;
         current = current->previous_layer;
         matrix_free(derived_results);
-        matrix_free(delta);
+        matrix_free(delta_weights);
         //matrix_free(prediction[i]);
     }
     for (int i = 0; i < layer_number; i++) {
