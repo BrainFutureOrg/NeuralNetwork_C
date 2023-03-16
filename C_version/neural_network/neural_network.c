@@ -151,7 +151,6 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
                                              tmatrix);
         matrix_free(tmatrix);
         //l2 normalisation
-        matrix_multiply_by_constant(delta, 1/l2norm(delta));
         //
         matrix_multiply_by_constant(delta, learning_rate);
         matrix weights = current->weights;
@@ -164,11 +163,6 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         matrix_free(tmatrix);
         matrix_free(distributed_error);
         distributed_error = distributed_error2;
-        double maxmodule = fabs(distributed_error.table[0][0]);
-        for (int i = 0; i < distributed_error.i; i++) {
-            if (fabs(distributed_error.table[i][0]) > maxmodule) maxmodule = fabs(distributed_error.table[i][0]);
-        }
-        matrix_multiply_by_constant(distributed_error, 1.0/maxmodule);
         current = current->previous_layer;
         matrix_free(derived_results);
         matrix_free(delta);

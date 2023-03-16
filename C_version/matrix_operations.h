@@ -38,6 +38,12 @@ matrix create_vector(int feach_num, int this);
 
 void matrix_restrict(matrix matrix_for_operation, double limit);
 
-double l2norm(matrix matrix_for_operation);
+double frobenius_norm(matrix matrix_for_operation);
+
+void frobenius_normalize(matrix matrix_for_operation);
+
+double matrix_max_absolute(matrix matrix_for_operation);
+
+void max_abs_normalize(matrix matrix_for_operation);
 
 #endif //C_VERSION_MATRIX_OPERATIONS_H

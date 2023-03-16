@@ -128,10 +128,21 @@ matrix make_matrix_from_array(const double *double_array, int i, int j) {
 }
 
 matrix matrix_substact(matrix first_matrix, matrix second_matrix) {
-    matrix result = first_matrix;
-    matrix_multiply_by_constant(second_matrix, -1);
-    return matrix_addition(result, second_matrix);
-
+    matrix result;
+    if (first_matrix.i != second_matrix.i || first_matrix.j != second_matrix.j) {
+        printf("matr sub firstmatrix %d x %d secondmatrix %d x %d", first_matrix.i, first_matrix.j, second_matrix.i,
+               second_matrix.j);
+        errno = ERANGE;
+        result.i = result.j = 0;
+        return result;
+    }
+    result = matrix_copy(first_matrix);
+    for (int i = 0; i < first_matrix.i; i++) {
+        for (int j = 0; j < first_matrix.j; j++) {
+            result.table[i][j] -= second_matrix.table[i][j];
+        }
+    }
+    return result;
 }
 
 matrix matrix_multiplication_elements(matrix first_matrix, matrix second_matrix) {
@@ -161,7 +172,7 @@ void matrix_restrict(matrix matrix_for_operation, double limit) {
         }
     }
 }
-double l2norm(matrix matrix_for_operation){
+double frobenius_norm(matrix matrix_for_operation){
     double sum=0;
     for(int i=0; i<matrix_for_operation.i; i++){
         for(int j=0; j<matrix_for_operation.j; j++){
@@ -169,4 +180,19 @@ double l2norm(matrix matrix_for_operation){
         }
     }
     return sqrt(sum);
+}
+void frobenius_normalize(matrix matrix_for_operation){
+    matrix_multiply_by_constant(matrix_for_operation, 1/ frobenius_norm(matrix_for_operation));
+}
+double matrix_max_absolute(matrix matrix_for_operation){
+    double max= fabs(matrix_for_operation.table[0][0]);
+    for(int i=0; matrix_for_operation.i; i++){
+        for(int j=0; j<matrix_for_operation.j; j++){
+            if(max < fabs(matrix_for_operation.table[i][j]))max= fabs(matrix_for_operation.table[i][j]);
+        }
+    }
+    return max;
+}
+void max_abs_normalize(matrix matrix_for_operation){
+    matrix_multiply_by_constant(matrix_for_operation, 1/ matrix_max_absolute(matrix_for_operation));
 }
