@@ -135,8 +135,9 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
     current_results[0] = start_layer;
     for (int i = 1; i < layers_number + 1; i++) {
         current_results[i] = matrix_multiplication(current->weights, activated_results);
+
 //        matrix_free(activated_results);
-        activated_results = matrix_copy(current_results[i]);
+        activated_results = matrix_addition(matrix_copy(current_results[i]), current->bias);
 //        printf("%d %d\n", current->bias.i, current->bias.j);
         current->activation_function(&activated_results);
         current = current->next_layer;
@@ -166,12 +167,13 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         //matrix delta_weights = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
         //                                     tmatrix);//NO DDELETE
         matrix delta = matrix_multiplication_elements(distributed_error, prediction[i]);
-        //printf("before cringe");
-        matrix bias = matrix_addition(delta, current->bias);
-        //printf("after cringe");
-//        matrix_free(current->bias);
+        matrix delta_copy = matrix_copy(delta);
+        matrix_multiply_by_constant(delta_copy, learning_rate);
+        matrix bias = matrix_addition(current->bias, delta_copy);//CRINGE?
+        matrix_free(current->bias);
         current->bias = bias;
-
+        matrix_free(delta_copy);
+        //matrix_free(bias);
         matrix delta_weights = matrix_multiplication(delta,
                                                      tmatrix);
         matrix_free(tmatrix);
@@ -254,7 +256,7 @@ matrix predict(network_start_layer network, matrix start_layer) {
         } else {
             i++;
         }
-        current_results = multiplication;
+        current_results = matrix_addition(multiplication, current->bias);
         current->activation_function(&current_results);
         current = current->next_layer;
     }

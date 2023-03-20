@@ -25,10 +25,10 @@ void try_train_network();
 
 network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
-    add_layer(&network, 500, "ReLu");
-    add_layer(&network, 200, "ReLu");
+    //add_layer(&network, 500, "ReLu");
+//    add_layer(&network, 200, "ReLu");
     //add_layer(&network, 5, "ReLu");
-    add_layer(&network, 60, "ReLu");
+    add_layer(&network, 200, "ReLu");
     add_layer(&network, 10, "ReLu");
     return network;
 }
@@ -69,11 +69,13 @@ double func_for_matrix(double num) {
 void try_train_network() {
 
     network_start_layer MNIST_network = initialise_network();
+    matrix_print(MNIST_network.next_layer->bias);
+    matrix_print(MNIST_network.next_layer->weights);
     FILE *file;
 
     int test_numbers = 2;
 //    pass_line(file);
-    for (int p = 0; p < 100; ++p) {
+    for (int p = 0; p < 10000; ++p) {
         file = open_file("mnist_train.csv");
         pass_line(file);
         for (int w = 0; w < test_numbers; w++) {
@@ -84,7 +86,7 @@ void try_train_network() {
             matrix_multiply_by_constant(matrix_numbers, 1. / 256);
             matrix_function_to_elements(matrix_numbers, func_for_matrix);
 //        print_network()
-            learn_step(MNIST_network, 0.00000005, matrix_numbers, answer_vector);
+            learn_step(MNIST_network, 0.00003, matrix_numbers, answer_vector);
 //        if (errno != 0) {
 //        matrix_print(matrix_numbers);
 //            printf("\n");
@@ -131,6 +133,9 @@ void try_train_network() {
     }
     printf("accuracy = %lf\n", result);
     fclose(file);
+
+    matrix_print(MNIST_network.next_layer->bias);
+    matrix_print(MNIST_network.next_layer->weights);
 
     free_network(MNIST_network);
 }
@@ -247,6 +252,10 @@ void check_learning() {
     printf("%f\n", small_accuracy(network, inhuman_experiment, inhuman_experiment));
     //printf("%f\n", small_accuracy(network, inhuman_experiment2, inhuman_experiment2));
     //print_network(network);
+
+
+
+
     free_network(network);
     matrix_free(inhuman_experiment);
 }
