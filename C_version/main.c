@@ -73,7 +73,7 @@ void try_train_network() {
 
     int test_numbers = 2;
 //    pass_line(file);
-    for (int p = 0; p < 1000; ++p) {
+    for (int p = 0; p < 100; ++p) {
         file = open_file("mnist_train.csv");
         pass_line(file);
         for (int w = 0; w < test_numbers; w++) {
@@ -84,7 +84,7 @@ void try_train_network() {
             matrix_multiply_by_constant(matrix_numbers, 1. / 256);
             matrix_function_to_elements(matrix_numbers, func_for_matrix);
 //        print_network()
-            learn_step(MNIST_network, 0.005, matrix_numbers, answer_vector);
+            learn_step(MNIST_network, 0.00000005, matrix_numbers, answer_vector);
 //        if (errno != 0) {
 //        matrix_print(matrix_numbers);
 //            printf("\n");

@@ -96,7 +96,8 @@ void add_after_layer(network_start_layer *network, int neuron_numbers, char *act
     for (int i = 0; i < bias.i; i++) {
         bias.table[i][0] = (double) random() / INT_MAX + 0.001;
     }
-    network->next_layer->bias = bias;
+    //network->next_layer->bias = bias;
+    current->next_layer->bias=bias;
     printf("%d %d %f\n",network->next_layer->bias.i, network->next_layer->bias.j, network->next_layer->bias.table[0][0]);
 
     current->next_layer->weights = weighs;
@@ -165,7 +166,9 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
         //matrix delta_weights = matrix_multiplication(matrix_multiplication_elements(distributed_error, derived_results),
         //                                     tmatrix);//NO DDELETE
         matrix delta = matrix_multiplication_elements(distributed_error, prediction[i]);
+        //printf("before cringe");
         matrix bias = matrix_addition(delta, current->bias);
+        //printf("after cringe");
 //        matrix_free(current->bias);
         current->bias = bias;
 
