@@ -43,4 +43,7 @@ void print_network(network_start_layer network);
 
 void free_network(network_start_layer startLayer);
 
+void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
+                              matrix result_layer);
+
 #endif //C_VERSION_NEURAL_NETWORK_H

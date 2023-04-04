@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "network_activation_functions.h"
 #include <errno.h>
+#include "optimizers.h"
 
 #define EPSILON 0.00005
 
@@ -202,6 +203,39 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
     free(prediction);
 }
 
+void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
+                matrix result_layer) {
+    matrix *prediction = predict_all_layers(network, start_layer);
+    neural_network* current = last_layer(network);
+    int network_layer_number = count_hidden_layers(network);
+
+    matrix derived_results = matrix_copy_activated(prediction[network_layer_number], current->activation_function);
+    matrix nablaC = matrix_substact( derived_results,result_layer);
+    matrix_free(derived_results);
+
+    derived_results = matrix_copy_activated(prediction[network_layer_number], current->activation_function_derivative);
+    matrix dL=matrix_multiplication_elements(nablaC, derived_results);
+    matrix_free(derived_results);
+    matrix dl=dL;
+    for(int i=network_layer_number-1; i>=0; i--){
+        //temporary
+        gradient_descent(current, dl, learning_rate, prediction[i]);
+        //end temporary
+
+        current=current->previous_layer;
+        matrix transposed = matrix_transposition(current->next_layer->weights);
+        matrix multiplied = matrix_multiplication(transposed, dl);
+        matrix_free(transposed);
+        derived_results = matrix_copy(prediction[i]);
+        current->activation_function_derivative(&derived_results);
+        matrix_free(dl);
+        dl=matrix_multiplication_elements(multiplied, derived_results);
+        matrix_free(derived_results);
+        matrix_free(multiplied);
+
+
+    }
+}
 
 void learn_step2(network_start_layer network, double learning_rate, matrix start_layer,
                  matrix result_layer/*, double restriction*/) { //UNSURE
