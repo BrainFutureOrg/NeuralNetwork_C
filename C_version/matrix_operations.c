@@ -75,6 +75,12 @@ matrix matrix_copy(matrix matrix_to_copy) {
     return copy;
 }
 
+matrix matrix_copy_activated(matrix matrix_to_copy, void (*active_func)(matrix *)){
+    matrix copy = matrix_copy(matrix_to_copy);
+    active_func(&copy);
+    return copy;
+}
+
 matrix matrix_transposition(matrix matrix_to_transpose) {
     matrix result_matrix;
     result_matrix = matrix_creation(matrix_to_transpose.j, matrix_to_transpose.i);

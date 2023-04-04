@@ -27,6 +27,7 @@ void matrix_print(matrix matrix_to_print);
 void matrix_free(matrix matrix_to_free);
 
 matrix matrix_copy(matrix matrix_to_copy);
+matrix matrix_copy_activated(matrix matrix_to_copy, void (*active_func)(matrix *));
 
 void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(double));
 
