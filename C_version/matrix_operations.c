@@ -124,6 +124,14 @@ void matrix_multiply_by_constant(matrix matrix_for_operation, double number) {
     }
 }
 
+void matrix_add_scalar(matrix matrix_for_operation, double scalar){
+    for (int i = 0; i < matrix_for_operation.i; i++) {
+        for (int j = 0; j < matrix_for_operation.j; j++) {
+            matrix_for_operation.table[i][j]+=scalar;
+        }
+    }
+}
+
 matrix make_matrix_from_array(const double *double_array, int i, int j) {
     matrix result;
     result = matrix_creation(i, j);
@@ -203,4 +211,24 @@ double matrix_max_absolute(matrix matrix_for_operation){
 }
 void max_abs_normalize(matrix matrix_for_operation){
     matrix_multiply_by_constant(matrix_for_operation, 1/ matrix_max_absolute(matrix_for_operation));
+}
+
+coordinates matrix_argmax(matrix matrix_for_operation){
+    coordinates result;
+    result.i=result.j=0;
+    double max_elem= matrix_get_element(matrix_for_operation, 0, 0);
+    for(int i=0; i<matrix_for_operation.i; i++){
+        for(int j=0; j<matrix_for_operation.j; j++){
+            double element=matrix_get_element(matrix_for_operation,i,j);
+            if(element>max_elem) {
+                max_elem = element;
+                result.i=i;
+                result.j=j;
+            }
+        }
+    }
+    return result;
+}
+char coordinates_equals(coordinates coordinates1, coordinates coordinates2){
+    return coordinates1.i == coordinates2.i && coordinates1.j == coordinates2.j ? 1 : 0;
 }

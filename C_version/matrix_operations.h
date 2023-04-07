@@ -9,7 +9,10 @@ typedef struct matrix {
     int i;
     int j;
 } matrix;
-
+typedef struct coordinates{
+    int i;
+    int j;
+}coordinates;
 matrix matrix_multiplication(matrix first_matrix, matrix second_matrix);
 
 matrix matrix_transposition(matrix matrix_to_transpose);
@@ -33,6 +36,8 @@ void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(dou
 
 void matrix_multiply_by_constant(matrix matrix_for_operation, double number);
 
+void matrix_add_scalar(matrix matrix_for_operation, double scalar);
+
 matrix make_matrix_from_array(const double *double_array, int i, int j);
 
 matrix create_vector(int feach_num, int this);
@@ -46,5 +51,9 @@ void frobenius_normalize(matrix matrix_for_operation);
 double matrix_max_absolute(matrix matrix_for_operation);
 
 void max_abs_normalize(matrix matrix_for_operation);
+
+coordinates matrix_argmax(matrix matrix_for_operation);
+
+char coordinates_equals(coordinates coordinates1, coordinates coordinates2);
 
 #endif //C_VERSION_MATRIX_OPERATIONS_H

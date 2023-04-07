@@ -15,26 +15,26 @@
 
 #define EPSILON 0.00005
 
-void add_function_with_derivative(neural_network *network_layer, char *activation_function_name) {
-    if (strcmp(activation_function_name, "Sigmoid") == 0) {
+void add_function_with_derivative(neural_network *network_layer, activation_function_names activation_function_name) {
+    if (activation_function_name==Sigmoid) {
         network_layer->activation_function = network_sigmoid;
         network_layer->activation_function_derivative = network_sigmoid_derivative;
         return;
     }
 
-    if (strcmp(activation_function_name, "Softmax") == 0) {
+    if (activation_function_name==Softmax) {
         network_layer->activation_function = network_softmax;
         network_layer->activation_function_derivative = network_softmax_derivative;
         return;
     }
 
-    if (strcmp(activation_function_name, "Tanh") == 0) {
+    if (activation_function_name==Tangential) {
         network_layer->activation_function = network_tangential;
         network_layer->activation_function_derivative = network_tangential_derivative;
         return;
     }
 
-    if (strcmp(activation_function_name, "ReLu") == 0) {
+    if (activation_function_name==ReLu) {
         network_layer->activation_function = network_ReLU;
         network_layer->activation_function_derivative = network_ReLU_derivative;
         return;
@@ -57,7 +57,7 @@ network_start_layer create_network(int neuron_numbers) {
     return result;
 }
 
-void add_after_start_layer(network_start_layer *network, int neuron_numbers, char *activation_function_name) {
+void add_after_start_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name) {
     network->next_layer = calloc(1, sizeof(neural_network));
     matrix weighs = matrix_creation(neuron_numbers, network->i);
     for (int i = 0; i < weighs.i; i++) {
@@ -146,8 +146,8 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
     return current_results;
 }
 
-void learn_step(network_start_layer network, double learning_rate, matrix start_layer,
-                matrix result_layer/*, double restriction*/) { //UNSURE
+/*void learn_step(network_start_layer network, double learning_rate, matrix start_layer,
+                matrix result_layer) { //UNSURE
     int layer_number = count_hidden_layers(network);
     matrix *prediction = predict_all_layers(network, start_layer);
     neural_network *current = last_layer(network);
@@ -201,7 +201,7 @@ void learn_step(network_start_layer network, double learning_rate, matrix start_
     }
     matrix_free(distributed_error);
     free(prediction);
-}
+}*/
 
 void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
                 matrix result_layer) {
@@ -221,17 +221,24 @@ void learn_step_optimizerless(network_start_layer network, double learning_rate,
         //temporary
         gradient_descent(current, dl, learning_rate, prediction[i]);
         //end temporary
-
-        current=current->previous_layer;
-        matrix transposed = matrix_transposition(current->next_layer->weights);
+        //if(current->previous_layer==NULL)printf("FUCK");
+        matrix transposed = matrix_transposition(current->weights);
+        current = current->previous_layer;
+//        printf("%d\n", i);
+        //matrix transposed = matrix_transposition(current->next_layer->weights);//invalid read
+//        printf("frst invalid read\n");
         matrix multiplied = matrix_multiplication(transposed, dl);
         matrix_free(transposed);
-        derived_results = matrix_copy(prediction[i]);
-        current->activation_function_derivative(&derived_results);
+        derived_results = matrix_copy(prediction[i]);//invalid read
+//        printf("snd invalid read\n");
+        if(current!=NULL)
+        {
+            current->activation_function_derivative(&derived_results);
+        }
         matrix_free(dl);
         dl=matrix_multiplication_elements(multiplied, derived_results);
         matrix_free(derived_results);
-        matrix_free(multiplied);
+//        matrix_free(multiplied);
 
 
     }
@@ -299,6 +306,7 @@ matrix predict(network_start_layer network, matrix start_layer) {
 
 double small_accuracy(network_start_layer network, matrix start_layer, matrix answers) {
     double accuracy;
+
     matrix prediction = predict(network, start_layer);
     for (int i = 0; i < answers.i; i++) {
         accuracy += fabs(answers.table[i][0] - prediction.table[i][0] + EPSILON) / (prediction.table[i][0] + EPSILON) /
