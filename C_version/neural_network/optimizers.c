@@ -25,5 +25,5 @@ void gradient_descent(neural_network* layer, matrix error, double learning_rate,
     matrix_add_scalar(new_weights,-l2);
     matrix_free(layer->weights);
     layer->weights=new_weights;
-//    matrix_free(multiplied);
+    matrix_free(multiplied);
 }

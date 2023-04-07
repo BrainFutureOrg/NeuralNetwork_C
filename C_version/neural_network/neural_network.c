@@ -217,6 +217,7 @@ void learn_step_optimizerless(network_start_layer network, double learning_rate,
 
     derived_results = matrix_copy_activated(prediction[network_layer_number], current->activation_function_derivative);
     matrix dL=matrix_multiplication_elements(nablaC, derived_results);
+    matrix_free(nablaC);
     matrix_free(derived_results);
     matrix dl=dL;
 //    printf("LOOP START\n");

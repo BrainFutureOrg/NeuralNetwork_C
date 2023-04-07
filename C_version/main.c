@@ -76,7 +76,7 @@ void try_train_network() {
 //    matrix_print(MNIST_network.next_layer->weights);
     FILE *file;
 
-    int test_numbers = 300;
+    int test_numbers = 10;
 //    pass_line(file);
     for (int p = 0; p < 5; ++p) {
         file = open_file("mnist_train.csv");
@@ -112,9 +112,8 @@ void try_train_network() {
 
     file = open_file("mnist_train.csv");
     pass_line(file);
-    int has_result = 1;
-    double result;
-    int test_number = 300;
+    double result=0;
+    int test_number = 10;
     for (int p = 0; p < test_number; ++p) {
         double *numbers = get_line_matrix(file);
         matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
