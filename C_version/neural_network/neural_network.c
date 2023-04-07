@@ -133,17 +133,18 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
     int layers_number = count_hidden_layers(network);
     neural_network *current = network.next_layer;
     matrix *current_results = calloc(layers_number + 1, sizeof(matrix));
-    matrix activated_results = start_layer;
-    current_results[0] = start_layer;
+    matrix activated_results = matrix_copy(start_layer);
+    current_results[0] = matrix_copy(start_layer);
     for (int i = 1; i < layers_number + 1; i++) {
         current_results[i] = matrix_multiplication(current->weights, activated_results);
-
+        matrix_free(activated_results);
 //        matrix_free(activated_results);
-        activated_results = matrix_addition(matrix_copy(current_results[i]), current->bias);
+        activated_results = matrix_addition(current_results[i], current->bias);
 //        printf("%d %d\n", current->bias.i, current->bias.j);
         current->activation_function(&activated_results);
         current = current->next_layer;
     }
+    matrix_free(activated_results);
     return current_results;
 }
 
@@ -216,6 +217,7 @@ void learn_step_optimizerless(network_start_layer network, double learning_rate,
     matrix_free(derived_results);
 
     derived_results = matrix_copy_activated(prediction[network_layer_number], current->activation_function_derivative);
+
     matrix dL=matrix_multiplication_elements(nablaC, derived_results);
     matrix_free(nablaC);
     matrix_free(derived_results);
@@ -242,10 +244,15 @@ void learn_step_optimizerless(network_start_layer network, double learning_rate,
         matrix_free(dl);
         dl=matrix_multiplication_elements(multiplied, derived_results);
         matrix_free(derived_results);
-//        matrix_free(multiplied);
+//
+        matrix_free(multiplied);
 
 
     }
+    matrix_free(dl);
+    for(int i=network_layer_number; i>=0; i--)
+        matrix_free(prediction[i]);
+    free(prediction);
 }
 
 void learn_step2(network_start_layer network, double learning_rate, matrix start_layer,
@@ -302,12 +309,7 @@ matrix predict(network_start_layer network, matrix start_layer) {
             i++;
         }
         current_results = matrix_addition(multiplication, current->bias);
-        if(current->next_layer==NULL){
-//            printf("___________________________\n");
-//            matrix_print(current_results);
-//            printf("___________________________\n");
-
-        }
+        matrix_free(multiplication);
         current->activation_function(&current_results);
         current = current->next_layer;
     }
@@ -346,6 +348,7 @@ void free_network(network_start_layer network) {
     while (current != NULL) {
         neural_network *current2 = current->next_layer;
         matrix_free(current->weights);
+        matrix_free(current->bias);
         free(current);
         current = current2;
     }

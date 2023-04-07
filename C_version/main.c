@@ -69,6 +69,16 @@ double func_for_matrix(double num) {
     return num + 0.05;
 }
 
+double lr(int i){
+    if (i<10)
+        return 0.5;
+    if (i<15)
+        return 0.1;
+    if (i<25)
+        return 0.05;
+    return 0.01;
+}
+
 void try_train_network() {
 
     network_start_layer MNIST_network = initialise_network();
@@ -78,7 +88,7 @@ void try_train_network() {
 
     int test_numbers = 10;
 //    pass_line(file);
-    for (int p = 0; p < 5; ++p) {
+    for (int p = 0; p < 30; ++p) {
         file = open_file("mnist_train.csv");
         pass_line(file);
         for (int w = 0; w < test_numbers; w++) {
@@ -89,8 +99,6 @@ void try_train_network() {
             matrix_multiply_by_constant(matrix_numbers, 1. / 256);
             matrix_function_to_elements(matrix_numbers, func_for_matrix);
 //        print_network()
-            if(p==0)
-            predict(MNIST_network, matrix_numbers);
             learn_step_optimizerless(MNIST_network, 0.5, matrix_numbers, answer_vector, 0.002);
 //        if (errno != 0) {
 //        matrix_print(matrix_numbers);
@@ -105,7 +113,7 @@ void try_train_network() {
             matrix_free(answer_vector);
 //            printf("%d ", w);
         }
-        printf("\nended epoch %d\n", p);
+//        printf("\nended epoch %d\n", p);
         fclose(file);
     }
 
@@ -122,14 +130,12 @@ void try_train_network() {
         matrix_function_to_elements(matrix_numbers, func_for_matrix);
         //end new
         matrix answer_vector = create_vector(10, (int) numbers[0]);
-        if (has_result != 0) {
-            printf("right - %.0f predicted - %d\n", numbers[0], predict_number(MNIST_network, matrix_numbers));
-//            matrix_print(predict(MNIST_network, matrix_numbers));
-            result += small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
-        } else {
-            result = small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
-            has_result++;
-        }
+        printf("right - %.0f predicted - %d\n", numbers[0], predict_number(MNIST_network, matrix_numbers));
+        matrix prediction_results = predict(MNIST_network, matrix_numbers);
+//        matrix_print(prediction_results);
+        matrix_free(prediction_results);
+        result += small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
+
         free(numbers);
         matrix_free(matrix_numbers);
         matrix_free(answer_vector);
