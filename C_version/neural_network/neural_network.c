@@ -3,15 +3,16 @@
 //
 
 #include "neural_network.h"
-#include "stdlib.h"
-#include "math.h"
+#include "network_activation_functions.h"
+#include "optimizers.h"
 #include "../matrix_operations.h"
+#include "../statistical_random.h"
+#include <stdlib.h>
+#include <math.h>
 #include <limits.h>
 #include <string.h>
 #include <stdio.h>
-#include "network_activation_functions.h"
 #include <errno.h>
-#include "optimizers.h"
 
 #define EPSILON 0.00005
 
@@ -62,25 +63,25 @@ void add_after_start_layer(network_start_layer *network, int neuron_numbers, act
     matrix weighs = matrix_creation(neuron_numbers, network->i);
     for (int i = 0; i < weighs.i; i++) {
         for (int j = 0; j < weighs.j; j++) {
-            weighs.table[i][j] = (double) random() / INT_MAX + 0.001;
+            weighs.table[i][j] = randn();
         }
     }
 
     matrix bias = matrix_creation(neuron_numbers, 1);
     for (int i = 0; i < bias.i; i++) {
-        bias.table[i][0] = (double) random() / INT_MAX + 0.001;
+        bias.table[i][0] = randn();
     }
 
     network->next_layer->weights = weighs;
     network->next_layer->bias = bias;
-    printf("%d\n",network->next_layer->bias.i);
+//    printf("%d\n",network->next_layer->bias.i);
     //matrix_free(weighs);
     network->next_layer->next_layer = NULL;
     network->next_layer->previous_layer = NULL;
     add_function_with_derivative(network->next_layer, activation_function_name);
 }
 
-void add_after_layer(network_start_layer *network, int neuron_numbers, char *activation_function_name) {
+void add_after_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name) {
     neural_network *current = network->next_layer;
     while (current->next_layer != NULL) {
         current = current->next_layer;
@@ -89,17 +90,17 @@ void add_after_layer(network_start_layer *network, int neuron_numbers, char *act
     matrix weighs = matrix_creation(neuron_numbers, current->weights.i);
     for (int i = 0; i < weighs.i; i++) {
         for (int j = 0; j < weighs.j; j++) {
-            weighs.table[i][j] = (double) random() / INT_MAX + 0.001;
+            weighs.table[i][j] = randn();
         }
     }
 
     matrix bias = matrix_creation(neuron_numbers, 1);
     for (int i = 0; i < bias.i; i++) {
-        bias.table[i][0] = (double) random() / INT_MAX + 0.001;
+        bias.table[i][0] = randn();
     }
     //network->next_layer->bias = bias;
     current->next_layer->bias=bias;
-    printf("%d %d %f\n",network->next_layer->bias.i, network->next_layer->bias.j, network->next_layer->bias.table[0][0]);
+//    printf("%d %d %f\n",network->next_layer->bias.i, network->next_layer->bias.j, network->next_layer->bias.table[0][0]);
 
     current->next_layer->weights = weighs;
     //matrix_free(weighs);
@@ -108,7 +109,7 @@ void add_after_layer(network_start_layer *network, int neuron_numbers, char *act
     add_function_with_derivative(current->next_layer, activation_function_name);
 }
 
-void add_layer(network_start_layer *network, int neuron_numbers, char *activation_function_name) {
+void add_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name) {
 //    printf("add layer start\n");
     if (network->next_layer == NULL) {
         add_after_start_layer(network, neuron_numbers, activation_function_name);
@@ -204,7 +205,8 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
 }*/
 
 void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
-                matrix result_layer) {
+                matrix result_layer, double l2) {
+//    printf("START GD");
     matrix *prediction = predict_all_layers(network, start_layer);
     neural_network* current = last_layer(network);
     int network_layer_number = count_hidden_layers(network);
@@ -217,9 +219,10 @@ void learn_step_optimizerless(network_start_layer network, double learning_rate,
     matrix dL=matrix_multiplication_elements(nablaC, derived_results);
     matrix_free(derived_results);
     matrix dl=dL;
+//    printf("LOOP START\n");
     for(int i=network_layer_number-1; i>=0; i--){
         //temporary
-        gradient_descent(current, dl, learning_rate, prediction[i]);
+        gradient_descent(current, dl, learning_rate, prediction[i], l2);
         //end temporary
         //if(current->previous_layer==NULL)printf("FUCK");
         matrix transposed = matrix_transposition(current->weights);
@@ -257,7 +260,7 @@ void learn_step2(network_start_layer network, double learning_rate, matrix start
 }
 
 void learn_step3(network_start_layer network, double learning_rate, matrix start_layer,
-                 matrix result_layer/*, double restriction*/) {
+                 matrix result_layer, double l2/*, double restriction*/) {
     int layer_number = count_hidden_layers(network);
     matrix *prediction = predict_all_layers(network, start_layer);
     neural_network *current = last_layer(network);
@@ -298,22 +301,35 @@ matrix predict(network_start_layer network, matrix start_layer) {
             i++;
         }
         current_results = matrix_addition(multiplication, current->bias);
+        if(current->next_layer==NULL){
+//            printf("___________________________\n");
+//            matrix_print(current_results);
+//            printf("___________________________\n");
+
+        }
         current->activation_function(&current_results);
         current = current->next_layer;
     }
     return current_results;
 }
 
+int predict_number(network_start_layer network, matrix start_layer) {
+    matrix prediction = predict(network, start_layer);
+    coordinates max_pred = matrix_argmax(prediction);
+
+    matrix_free(prediction);
+    return max_pred.i;
+}
+
 double small_accuracy(network_start_layer network, matrix start_layer, matrix answers) {
     double accuracy;
 
     matrix prediction = predict(network, start_layer);
-    for (int i = 0; i < answers.i; i++) {
-        accuracy += fabs(answers.table[i][0] - prediction.table[i][0] + EPSILON) / (prediction.table[i][0] + EPSILON) /
-                    answers.i;
-    }
+    coordinates max_pred = matrix_argmax(prediction);
+    coordinates max_answ = matrix_argmax(answers);
+
     matrix_free(prediction);
-    return 1 - accuracy;
+    return coordinates_equals(max_answ, max_pred);
 }
 
 double accuracy(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_accuracy) {

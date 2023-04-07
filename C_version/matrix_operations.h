@@ -14,7 +14,7 @@ typedef struct coordinates{
     int j;
 }coordinates;
 matrix matrix_multiplication(matrix first_matrix, matrix second_matrix);
-
+double matrix_get_element(matrix matrx, int i, int j);
 matrix matrix_transposition(matrix matrix_to_transpose);
 
 matrix matrix_addition(matrix first_matrix, matrix second_matrix);

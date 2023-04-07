@@ -28,8 +28,11 @@ network_start_layer initialise_network() {
     //add_layer(&network, 500, "ReLu");
 //    add_layer(&network, 200, "ReLu");
     //add_layer(&network, 5, "ReLu");
-    add_layer(&network, 200, "Sigmoid");
-    add_layer(&network, 10, "Sigmoid");
+    add_layer(&network, 200, Sigmoid);
+//    add_layer(&network, 200, "Sigmoid");
+//    add_layer(&network, 100, "Sigmoid");
+//    add_layer(&network, 50, "Sigmoid");
+    add_layer(&network, 10, Sigmoid);
     return network;
 }
 
@@ -86,7 +89,9 @@ void try_train_network() {
             matrix_multiply_by_constant(matrix_numbers, 1. / 256);
             matrix_function_to_elements(matrix_numbers, func_for_matrix);
 //        print_network()
-            learn_step_optimizerless(MNIST_network, 0.00003, matrix_numbers, answer_vector);
+            if(p==0)
+            predict(MNIST_network, matrix_numbers);
+            learn_step_optimizerless(MNIST_network, 0.5, matrix_numbers, answer_vector, 0.002);
 //        if (errno != 0) {
 //        matrix_print(matrix_numbers);
 //            printf("\n");
@@ -98,7 +103,7 @@ void try_train_network() {
             free(numbers);
             matrix_free(matrix_numbers);
             matrix_free(answer_vector);
-            printf("%d ", w);
+//            printf("%d ", w);
         }
         printf("\nended epoch %d\n", p);
         fclose(file);
@@ -119,8 +124,8 @@ void try_train_network() {
         //end new
         matrix answer_vector = create_vector(10, (int) numbers[0]);
         if (has_result != 0) {
-            printf("right - %f predicted - \n", numbers[0]);
-            matrix_print(predict(MNIST_network, matrix_numbers));
+            printf("right - %.0f predicted - %d\n", numbers[0], predict_number(MNIST_network, matrix_numbers));
+//            matrix_print(predict(MNIST_network, matrix_numbers));
             result += small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
         } else {
             result = small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
@@ -134,8 +139,8 @@ void try_train_network() {
     printf("accuracy = %lf\n", result);
     fclose(file);
 
-    matrix_print(MNIST_network.next_layer->bias);
-    matrix_print(MNIST_network.next_layer->weights);
+//    matrix_print(MNIST_network.next_layer->bias);
+//    matrix_print(MNIST_network.next_layer->weights);
 
     free_network(MNIST_network);
 }
@@ -203,11 +208,11 @@ void check_matrix_multiplication() {
 void check_learning() {
     network_start_layer network = create_network(4);
     //printf("start creating network\n");
-    add_layer(&network, 5, "Sigmoid");
-    add_layer(&network, 6, "Sigmoid");
+    add_layer(&network, 5, Sigmoid);
+    add_layer(&network, 6, Sigmoid);
     //add_layer(&network, 5, "Tanh");
     //add_layer(&network, 5, "Sigmoid");
-    add_layer(&network, 4, "Sigmoid");
+    add_layer(&network, 4, Sigmoid);
     //printf("end creating network\n");
     //print_network(network);
     matrix inhuman_experiment;
@@ -230,8 +235,8 @@ void check_learning() {
     inhuman_experiment2.table = table2;
     for (int i = 0; i < 40000; i++) {
         //printf("start learning\n");
-        learn_step(network, 0.05, inhuman_experiment, inhuman_experiment);
-        learn_step(network, 0.05, inhuman_experiment2, inhuman_experiment2);
+//        learn_step(network, 0.05, inhuman_experiment, inhuman_experiment);
+//        learn_step(network, 0.05, inhuman_experiment2, inhuman_experiment2);
         printf("ended learning step %d\n", i);
         //just accuracy
         printf("\nepoch %d\n", i);

@@ -30,6 +30,10 @@ matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
     return result;
 }
 
+double matrix_get_element(matrix matrx, int i, int j){
+    return matrx.table[i][j];
+}
+
 #pragma region add
 
 matrix matrix_addition(matrix first_matrix, matrix second_matrix) {
