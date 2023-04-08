@@ -30,10 +30,6 @@ void network_tangential_derivative(matrix *M) {
     matrix_function_to_elements(*M, tangential_derivative);
 }
 
-//void network_leakyReLU(double x, double slope);
-
-//void network_leakyReLU_derivative(double x, double slope);
-
 void network_ReLU(matrix *M) {
     matrix_function_to_elements(*M, ReLU);
 }

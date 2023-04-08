@@ -54,4 +54,14 @@ void free_network(network_start_layer startLayer);
 void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
                               matrix result_layer, double l2);
 
+void learn_step_optimizerless_array(network_start_layer network, double learning_rate, matrix* start_layer,
+                              matrix* result_layer, int sample_number,double l2);
+
+void learn_step_optimizerless_paired_array(network_start_layer network, double learning_rate, matrix** start_result_layer, int sample_number,
+                                     double l2);
+
+double mse_loss(network_start_layer network, matrix* start_layers, int sample_number, matrix* expected_results);
+void test_network(network_start_layer network, matrix* start_layers, int start_layer_number, matrix* expected_results);
+void test_network_paired(network_start_layer network, matrix** start_result_layers, int sample_number);
+
 #endif //C_VERSION_NEURAL_NETWORK_H

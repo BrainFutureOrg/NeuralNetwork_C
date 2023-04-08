@@ -86,67 +86,24 @@ void try_train_network() {
 //    matrix_print(MNIST_network.next_layer->weights);
     FILE *file;
 
-    int test_numbers = 10;
+    int train_numbers = 100;
+    int validation_numbers = 100;
+    int test_number = 100;
+    int epoch = 3;
+
+    matrix** train_full_data = get_data("mnist_train.csv", train_numbers);
+    matrix** validation_full_data = get_data("mnist_train.csv", validation_numbers);
 //    pass_line(file);
-    for (int p = 0; p < 30; ++p) {
-        file = open_file("mnist_train.csv");
-        pass_line(file);
-        for (int w = 0; w < test_numbers; w++) {
-            double *numbers = get_line_matrix(file);
-//        matrix_print(matrix_numbers);
-            matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
-            matrix answer_vector = create_vector(10, (int) numbers[0]);
-            matrix_multiply_by_constant(matrix_numbers, 1. / 256);
-            matrix_function_to_elements(matrix_numbers, func_for_matrix);
-//        print_network()
-            learn_step_optimizerless(MNIST_network, 0.5, matrix_numbers, answer_vector, 0.002);
-//        if (errno != 0) {
-//        matrix_print(matrix_numbers);
-//            printf("\n");
-//            matrix_print(answer_vector);
-//            printf("%d i_answer %d j_answer %d i_matrix %d j_matrix %d\n", p, answer_vector.i, answer_vector.j,
-//                   matrix_numbers.i, matrix_numbers.j);
-//            return;
-//        }
-            free(numbers);
-            matrix_free(matrix_numbers);
-            matrix_free(answer_vector);
-//            printf("%d ", w);
-        }
-//        printf("\nended epoch %d\n", p);
-        fclose(file);
+    for (int p = 0; p < epoch; ++p) {
+        learn_step_optimizerless_paired_array(MNIST_network, 0.5, train_full_data, train_numbers, 0.002);
+        test_network_paired(MNIST_network, validation_full_data, validation_numbers);
     }
 
+    printf("\nTEST\n");
 
-    file = open_file("mnist_train.csv");
-    pass_line(file);
-    double result=0;
-    int test_number = 10;
-    for (int p = 0; p < test_number; ++p) {
-        double *numbers = get_line_matrix(file);
-        matrix matrix_numbers = make_matrix_from_array(&numbers[1], 28 * 28, 1);
-        //new
-        matrix_multiply_by_constant(matrix_numbers, 1. / 256);
-        matrix_function_to_elements(matrix_numbers, func_for_matrix);
-        //end new
-        matrix answer_vector = create_vector(10, (int) numbers[0]);
-        printf("right - %.0f predicted - %d\n", numbers[0], predict_number(MNIST_network, matrix_numbers));
-        matrix prediction_results = predict(MNIST_network, matrix_numbers);
-//        matrix_print(prediction_results);
-        matrix_free(prediction_results);
-        result += small_accuracy(MNIST_network, matrix_numbers, answer_vector) / test_number;
-
-        free(numbers);
-        matrix_free(matrix_numbers);
-        matrix_free(answer_vector);
-        printf("\n\n\n\n\n");
-    }
-    printf("accuracy = %lf\n", result);
-    fclose(file);
-
-//    matrix_print(MNIST_network.next_layer->bias);
-//    matrix_print(MNIST_network.next_layer->weights);
-
+    matrix** test_full_data = get_data("mnist_train.csv", test_number);
+    test_network_paired(MNIST_network, test_full_data, test_number);
+    free_data(test_full_data, test_number);
     free_network(MNIST_network);
 }
 
