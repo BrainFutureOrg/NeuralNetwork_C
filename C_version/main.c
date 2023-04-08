@@ -79,6 +79,43 @@ double lr(int i){
     return 0.01;
 }
 
+void data_prepear(matrix data){
+    matrix_multiply_by_constant(data, 1. / 256);
+    matrix_function_to_elements(data, func_for_matrix);
+}
+
+matrix** get_data(char* File_name, int line_number){
+    matrix** data = calloc(2, sizeof(matrix*));
+    matrix* answers = calloc(line_number, sizeof(matrix));
+    matrix* for_predict = calloc(line_number, sizeof(matrix));
+    data[1] = answers;
+    data[0] = for_predict;
+    FILE *file;
+    file = open_file(File_name);
+    pass_line(file);
+    for (int w = 0; w < line_number; w++) {
+        double *numbers = get_line_matrix(file);
+        for_predict[w] = make_matrix_from_array(&numbers[1], 28 * 28, 1);
+        data_prepear(for_predict[w]);
+        answers[w] = create_vector(10, (int) numbers[0]);
+        free(numbers);
+    }
+    fclose(file);
+    return data;
+}
+
+void free_data(matrix** data, int data_num){
+    for (int i=0; i<data_num; i++){
+        for(int j=0; j<2; j++) {
+            matrix_free(data[j][i]);
+        }
+    }
+    for(int j=0; j<2; j++) {
+        free(data[j]);
+    }
+    free(data);
+}
+
 void try_train_network() {
 
     network_start_layer MNIST_network = initialise_network();
@@ -98,6 +135,8 @@ void try_train_network() {
         learn_step_optimizerless_paired_array(MNIST_network, 0.5, train_full_data, train_numbers, 0.002);
         test_network_paired(MNIST_network, validation_full_data, validation_numbers);
     }
+    free_data(train_full_data, train_numbers);
+    free_data(validation_full_data, validation_numbers);
 
     printf("\nTEST\n");
 

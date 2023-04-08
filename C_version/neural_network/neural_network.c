@@ -239,7 +239,7 @@ double small_accuracy(network_start_layer network, matrix start_layer, matrix an
 }
 
 double accuracy(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_accuracy) {
-    double accuracy;
+    double accuracy = 0;
     for (int i = 0; i < len_of_accuracy; i++) {
         accuracy += small_accuracy(network, start_layers[i], answers[i]) / len_of_accuracy;
     }
