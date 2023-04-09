@@ -25,13 +25,7 @@ void try_train_network();
 
 network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
-    //add_layer(&network, 500, "ReLu");
-//    add_layer(&network, 200, "ReLu");
-    //add_layer(&network, 5, "ReLu");
     add_layer(&network, 200, Sigmoid);
-//    add_layer(&network, 200, "Sigmoid");
-//    add_layer(&network, 100, "Sigmoid");
-//    add_layer(&network, 50, "Sigmoid");
     add_layer(&network, 10, Sigmoid);
     return network;
 }
@@ -131,12 +125,13 @@ void try_train_network() {
     double l1 = 0.00005;
     double l2 = 0.00005;
     double lr = 0.05;
+    int batch_size = 8;
 
     matrix** train_full_data = get_data("mnist_train.csv", train_numbers);
     matrix** validation_full_data = get_data("mnist_train.csv", validation_numbers);
 //    pass_line(file);
     for (int p = 0; p < epoch; ++p) {
-        learn_step_optimizerless_paired_array(MNIST_network, lr, train_full_data, train_numbers, l1, l2);
+        learn_step_optimizerless_paired_array_batch(MNIST_network, lr, train_full_data, train_numbers,  batch_size, l1, l2);
         test_network_paired(MNIST_network, validation_full_data, validation_numbers);
     }
     free_data(train_full_data, train_numbers);
@@ -146,6 +141,7 @@ void try_train_network() {
 
     matrix** test_full_data = get_data("mnist_train.csv", test_number);
     test_network_paired(MNIST_network, test_full_data, test_number);
+    confusion_matrix_paired(MNIST_network, test_full_data, test_number);
     free_data(test_full_data, test_number);
     free_network(MNIST_network);
 }

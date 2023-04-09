@@ -29,11 +29,11 @@ void gradient_descent(neural_network* layer, matrix error, double learning_rate,
     matrix_multiply_by_constant(multiplied, learning_rate);
     matrix new_weights= matrix_substact(layer->weights, multiplied);//+-
 
-    matrix l1_mtrx = matrix_copy(new_weights);
+    matrix l1_mtrx = matrix_copy(layer->weights);
     matrix_function_to_elements(l1_mtrx, signum);
     matrix_multiply_by_constant(l1_mtrx, l1);
 
-    matrix l2_mtrx = matrix_copy(new_weights);
+    matrix l2_mtrx = matrix_copy(layer->weights);
     matrix_multiply_by_constant(l2_mtrx, l2);
 
     matrix_subtract_inplace(new_weights, l1_mtrx);

@@ -109,6 +109,26 @@ void matrix_print(matrix matrix_to_print) {
     }
 }
 
+void matrix_print_with_indexation(matrix matrix_to_print){
+    printf("    ");
+    for (int j = 0; j < matrix_to_print.j; j++) {
+        printf("%4d ", j);
+    }
+    printf("\n    ");
+    for (int j = 0; j < matrix_to_print.j; j++) {
+        printf("_____");
+    }
+    printf("\n");
+
+    for (int i = 0; i < matrix_to_print.i; i++) {
+        printf("%2d| ",i);
+        for (int j = 0; j < matrix_to_print.j; j++) {
+            printf("%2.2f ", matrix_to_print.table[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 void matrix_free(matrix matrix_to_free) {
     for (int i = 0; i < matrix_to_free.i; ++i) {
         free(matrix_to_free.table[i]);

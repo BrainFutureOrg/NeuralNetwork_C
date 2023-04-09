@@ -327,6 +327,26 @@ double accuracy(network_start_layer network, matrix *start_layers, matrix *answe
     return accuracy;
 }
 
+void confusion_matrix(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_data) {
+    int size = answers[0].i;
+    matrix confusion = matrix_creation(size, size);
+    printf("predict\\true\n");
+    for (int i = 0; i < len_of_data; i++) {
+        matrix prediction = predict(network, start_layers[i]);
+        coordinates max_pred = matrix_argmax(prediction);
+        coordinates max_answ = matrix_argmax(answers[i]);
+        confusion.table[max_pred.i][max_answ.i] += 1;
+        matrix_free(prediction);
+
+    }
+    matrix_print_with_indexation(confusion);
+    matrix_free(confusion);
+}
+
+void confusion_matrix_paired(network_start_layer network, matrix** start_result_layers, int len_of_data){
+    confusion_matrix(network, start_result_layers[0], start_result_layers[1], len_of_data);
+}
+
 void free_network(network_start_layer network) {
     neural_network *current = network.next_layer;
     while (current != NULL) {
@@ -364,4 +384,30 @@ void test_network(network_start_layer network, matrix* start_layers, int start_l
 
 void test_network_paired(network_start_layer network, matrix** start_result_layers, int sample_number){
     test_network(network, start_result_layers[0], sample_number, start_result_layers[1]);
+}
+
+neural_network* copy_neural_network_layer(neural_network* layer ){
+    neural_network* copy = calloc(1, sizeof(neural_network));
+    copy->next_layer = copy->previous_layer = NULL;
+    copy->activation_function_derivative = layer->activation_function_derivative;
+    copy->activation_function = layer->activation_function;
+    copy->weights = matrix_copy(layer->weights);
+    copy->bias = matrix_copy(layer->bias);
+    return copy;
+}
+
+network_start_layer neural_network_copy(network_start_layer network){
+    network_start_layer network_copy = network;
+    neural_network* network_layers = network.next_layer;
+    neural_network* last_copied_layer = copy_neural_network_layer(network_layers);
+    network_copy.next_layer = last_copied_layer;
+    while ((network_layers = network_layers->next_layer)!=NULL){
+//        printf("copy_");
+        neural_network* layer_copy = copy_neural_network_layer(network_layers);
+        layer_copy->previous_layer = last_copied_layer;
+        last_copied_layer->next_layer = layer_copy;
+        last_copied_layer = layer_copy;
+    }
+//    printf("\n");
+    return network_copy;
 }
