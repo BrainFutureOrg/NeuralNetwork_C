@@ -140,7 +140,7 @@ matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
 }
 
 void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
-                matrix result_layer, double l2) {
+                matrix result_layer, double l1, double l2) {
     matrix *prediction = predict_all_layers(network, start_layer);
     neural_network* current = last_layer(network);
     int network_layer_number = count_hidden_layers(network);
@@ -156,7 +156,7 @@ void learn_step_optimizerless(network_start_layer network, double learning_rate,
     matrix_free(derived_results);
     matrix dl=dL;
     for(int i=network_layer_number-1; i>=0; i--){
-        gradient_descent(current, dl, learning_rate, prediction[i], l2);
+        gradient_descent(current, dl, learning_rate, prediction[i], l1, l2);
         matrix transposed = matrix_transposition(current->weights);
         current = current->previous_layer;
         matrix multiplied = matrix_multiplication(transposed, dl);
@@ -178,15 +178,15 @@ void learn_step_optimizerless(network_start_layer network, double learning_rate,
 }
 
 void learn_step_optimizerless_array(network_start_layer network, double learning_rate, matrix* start_layer,
-                                    matrix* result_layer, int sample_number,double l2){
+                                    matrix* result_layer, int sample_number, double l1, double l2){
     for(int i=0; i<sample_number; i++){
-        learn_step_optimizerless(network, learning_rate, start_layer[i], result_layer[i], l2);
+        learn_step_optimizerless(network, learning_rate, start_layer[i], result_layer[i], l1, l2);
     }
 }
 
 void learn_step_optimizerless_paired_array(network_start_layer network, double learning_rate, matrix** start_result_layer,int sample_number,
-                                           double l2){
-    learn_step_optimizerless_array(network, learning_rate, start_result_layer[0], start_result_layer[1], sample_number,l2);
+                                           double l1, double l2){
+    learn_step_optimizerless_array(network, learning_rate, start_result_layer[0], start_result_layer[1], sample_number,l1,l2);
 }
 
 void print_network(network_start_layer network) {

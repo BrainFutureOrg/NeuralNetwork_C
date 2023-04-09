@@ -123,16 +123,20 @@ void try_train_network() {
 //    matrix_print(MNIST_network.next_layer->weights);
     FILE *file;
 
-    int train_numbers = 100;
-    int validation_numbers = 100;
-    int test_number = 100;
-    int epoch = 3;
+    int train_numbers = 500;
+    int validation_numbers = 500;
+    int test_number = 500;
+
+    int epoch = 20;
+    double l1 = 0;
+    double l2 = 0;
+    double lr = 0.05;
 
     matrix** train_full_data = get_data("mnist_train.csv", train_numbers);
     matrix** validation_full_data = get_data("mnist_train.csv", validation_numbers);
 //    pass_line(file);
     for (int p = 0; p < epoch; ++p) {
-        learn_step_optimizerless_paired_array(MNIST_network, 0.5, train_full_data, train_numbers, 0.002);
+        learn_step_optimizerless_paired_array(MNIST_network, lr, train_full_data, train_numbers, l1, l2);
         test_network_paired(MNIST_network, validation_full_data, validation_numbers);
     }
     free_data(train_full_data, train_numbers);
