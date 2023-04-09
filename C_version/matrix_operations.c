@@ -157,6 +157,19 @@ matrix matrix_substact(matrix first_matrix, matrix second_matrix) {
     return result;
 }
 
+void matrix_subtract_inplace(matrix changed_matrix, matrix second_matrix){
+    if (changed_matrix.i != second_matrix.i || changed_matrix.j != second_matrix.j) {
+        printf("matr sub firstmatrix %d x %d secondmatrix %d x %d", changed_matrix.i, changed_matrix.j, second_matrix.i,
+               second_matrix.j);
+        errno = ERANGE;
+    }
+    for(int i=0; i<changed_matrix.i; i++){
+        for(int j=0; j<changed_matrix.j; j++){
+            changed_matrix.table[i][j]-=second_matrix.table[i][j];
+        }
+    }
+}
+
 matrix matrix_multiplication_elements(matrix first_matrix, matrix second_matrix) {
     matrix result;
     result = matrix_copy(first_matrix);

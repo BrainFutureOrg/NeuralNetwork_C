@@ -21,6 +21,8 @@ matrix matrix_addition(matrix first_matrix, matrix second_matrix);
 
 matrix matrix_substact(matrix first_matrix, matrix second_matrix);
 
+void matrix_subtract_inplace(matrix changed_matrix, matrix second_matrix);
+
 matrix matrix_multiplication_elements(matrix first_matrix, matrix second_matrix);
 
 matrix matrix_creation(int i, int j);
