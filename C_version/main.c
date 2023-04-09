@@ -123,13 +123,13 @@ void try_train_network() {
 //    matrix_print(MNIST_network.next_layer->weights);
     FILE *file;
 
-    int train_numbers = 500;
-    int validation_numbers = 500;
-    int test_number = 500;
+    int train_numbers = 5000;
+    int validation_numbers = 5000;
+    int test_number = 5000;
 
-    int epoch = 20;
-    double l1 = 0;
-    double l2 = 0;
+    int epoch = 3;
+    double l1 = 0.00005;
+    double l2 = 0.00005;
     double lr = 0.05;
 
     matrix** train_full_data = get_data("mnist_train.csv", train_numbers);

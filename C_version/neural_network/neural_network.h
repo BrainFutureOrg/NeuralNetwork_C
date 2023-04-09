@@ -60,8 +60,20 @@ void learn_step_optimizerless_array(network_start_layer network, double learning
 void learn_step_optimizerless_paired_array(network_start_layer network, double learning_rate, matrix** start_result_layer, int sample_number,
                                      double l1, double l2);
 
+void learn_step_optimizerless_batch(network_start_layer network, double learning_rate, matrix* start_layers,
+                              matrix* result_layers,int batch_size, double l1, double l2);
+
+void learn_step_optimizerless_array_batch(network_start_layer network, double learning_rate, matrix* start_layer,
+                                    matrix* result_layer, int sample_number, int batch_size, double l1,double l2);
+
+void learn_step_optimizerless_paired_array_batch(network_start_layer network, double learning_rate, matrix** start_result_layer, int sample_number, int batch_size,
+                                           double l1, double l2);
+
 double mse_loss(network_start_layer network, matrix* start_layers, int sample_number, matrix* expected_results);
 void test_network(network_start_layer network, matrix* start_layers, int start_layer_number, matrix* expected_results);
 void test_network_paired(network_start_layer network, matrix** start_result_layers, int sample_number);
+void confusion_matrix(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_data);
+void confusion_matrix_paired(network_start_layer network, matrix** start_result_layers, int len_of_data);
+network_start_layer neural_network_copy(network_start_layer network);
 
 #endif //C_VERSION_NEURAL_NETWORK_H

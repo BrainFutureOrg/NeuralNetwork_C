@@ -189,6 +189,87 @@ void learn_step_optimizerless_paired_array(network_start_layer network, double l
     learn_step_optimizerless_array(network, learning_rate, start_result_layer[0], start_result_layer[1], sample_number,l1,l2);
 }
 
+void learn_step_optimizerless_batch(network_start_layer network, double learning_rate, matrix* start_layers,
+                                    matrix* result_layers,int batch_size, double l1, double l2){
+    //printf("batch learnstep start\n");
+    int network_layer_number = count_hidden_layers(network);
+    network_start_layer new_network= neural_network_copy(network);
+    for(int batch=0; batch<batch_size; batch++) {
+        matrix *prediction = predict_all_layers(new_network, start_layers[batch]);
+        neural_network *current = last_layer(new_network);
+        neural_network *current_changed = last_layer(network);
+
+        matrix derived_results = matrix_copy_activated(prediction[network_layer_number], current->activation_function);
+        matrix nablaC = matrix_substact(derived_results, result_layers[batch]);
+        matrix_free(derived_results);
+
+        derived_results = matrix_copy_activated(prediction[network_layer_number],
+                                                current->activation_function_derivative);
+
+        matrix dL = matrix_multiplication_elements(nablaC, derived_results);
+        matrix_free(nablaC);
+        matrix_free(derived_results);
+        matrix dl = dL;
+        for (int i = network_layer_number - 1; i >= 0; i--) {
+            //gradient_descent_dual(current, current_changed,dl, learning_rate, prediction[i], l1, l2);
+            gradient_descent(current_changed,dl, learning_rate, prediction[i],l1/batch_size,l2/batch_size);//TODO array optimizer
+            matrix transposed = matrix_transposition(current->weights);
+            current = current->previous_layer;
+            current_changed=current_changed->previous_layer;
+            matrix multiplied = matrix_multiplication(transposed, dl);
+            matrix_free(transposed);
+            derived_results = matrix_copy(prediction[i]);//invalid read
+            if (current != NULL) {
+                current->activation_function_derivative(&derived_results);
+            }
+            matrix_free(dl);
+            dl = matrix_multiplication_elements(multiplied, derived_results);
+            matrix_free(derived_results);
+            matrix_free(multiplied);
+        }
+
+
+
+
+        matrix_free(dl);
+        for (int i = network_layer_number; i >= 0; i--)
+            matrix_free(prediction[i]);
+        free(prediction);
+    }
+    free_network(new_network);
+    //network=new_network;
+//    printf("batch ended\n");
+}
+
+void learn_step_optimizerless_array_batch(network_start_layer network, double learning_rate, matrix* start_layer,
+                                    matrix* result_layer, int sample_number, int batch_size, double l1, double l2){
+    for(int i=0; i<sample_number/batch_size; i++){
+        matrix* start_layers= calloc(batch_size, sizeof(matrix));
+        matrix* result_layers= calloc(batch_size, sizeof(matrix));
+        for(int j=0; j<batch_size; j++){
+            start_layers[j]=start_layer[i*batch_size+j];
+            result_layers[j]=result_layer[i*batch_size+j];
+        }
+        learn_step_optimizerless_batch(network, learning_rate, start_layers, result_layers, batch_size,l1, l2);
+        free(start_layers);
+        free(result_layers);
+    }
+    matrix* start_layers= calloc(sample_number%batch_size, sizeof(matrix));
+    matrix* result_layers= calloc(sample_number%batch_size, sizeof(matrix));
+    for(int j=0; j<sample_number%batch_size; j++){
+        start_layers[j]=start_layer[(sample_number/batch_size)*batch_size+j];
+        result_layers[j]=result_layer[(sample_number/batch_size)*batch_size+j];
+    }
+    learn_step_optimizerless_batch(network, learning_rate, start_layers, result_layers, sample_number%batch_size,l1, l2);
+    free(start_layers);
+    free(result_layers);
+}
+
+void learn_step_optimizerless_paired_array_batch(network_start_layer network, double learning_rate, matrix** start_result_layer, int sample_number, int batch_size,
+                                                 double l1, double l2){
+    learn_step_optimizerless_array_batch(network, learning_rate, start_result_layer[0], start_result_layer[1], sample_number, batch_size, l1, l2);
+}
+
 void print_network(network_start_layer network) {
     printf("startlayer\n");
     int i = 0;

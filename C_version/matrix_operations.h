@@ -19,6 +19,8 @@ matrix matrix_transposition(matrix matrix_to_transpose);
 
 matrix matrix_addition(matrix first_matrix, matrix second_matrix);
 
+matrix matrix_addition_inplace(matrix changed_matrix, matrix second_matrix);
+
 matrix matrix_substact(matrix first_matrix, matrix second_matrix);
 
 void matrix_subtract_inplace(matrix changed_matrix, matrix second_matrix);
