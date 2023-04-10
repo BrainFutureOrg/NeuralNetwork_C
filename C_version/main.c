@@ -33,7 +33,7 @@ network_start_layer initialise_network() {
 int main() {
     srandom(time(NULL));
 //    check_matrix_print();
-     //check_learning();
+    //check_learning();
 //    check_DAO();
     try_train_network();
     check_error_main
@@ -63,25 +63,25 @@ double func_for_matrix(double num) {
     return num + 0.05;
 }
 
-double lr(int i){
-    if (i<10)
+double lr(int i) {
+    if (i < 10)
         return 0.5;
-    if (i<15)
+    if (i < 15)
         return 0.1;
-    if (i<25)
+    if (i < 25)
         return 0.05;
     return 0.01;
 }
 
-void data_prepear(matrix data){
+void data_prepear(matrix data) {
     matrix_multiply_by_constant(data, 1. / 256);
     matrix_function_to_elements(data, func_for_matrix);
 }
 
-matrix** get_data(char* File_name, int line_number){
-    matrix** data = calloc(2, sizeof(matrix*));
-    matrix* answers = calloc(line_number, sizeof(matrix));
-    matrix* for_predict = calloc(line_number, sizeof(matrix));
+matrix **get_data(char *File_name, int line_number) {
+    matrix **data = calloc(2, sizeof(matrix *));
+    matrix *answers = calloc(line_number, sizeof(matrix));
+    matrix *for_predict = calloc(line_number, sizeof(matrix));
     data[1] = answers;
     data[0] = for_predict;
     FILE *file;
@@ -98,13 +98,13 @@ matrix** get_data(char* File_name, int line_number){
     return data;
 }
 
-void free_data(matrix** data, int data_num){
-    for (int i=0; i<data_num; i++){
-        for(int j=0; j<2; j++) {
+void free_data(matrix **data, int data_num) {
+    for (int i = 0; i < data_num; i++) {
+        for (int j = 0; j < 2; j++) {
             matrix_free(data[j][i]);
         }
     }
-    for(int j=0; j<2; j++) {
+    for (int j = 0; j < 2; j++) {
         free(data[j]);
     }
     free(data);
@@ -117,21 +117,22 @@ void try_train_network() {
 //    matrix_print(MNIST_network.next_layer->weights);
     FILE *file;
 
-    int train_numbers = 5000;
-    int validation_numbers = 5000;
-    int test_number = 5000;
+    int train_numbers = 500;
+    int validation_numbers = 50;
+    int test_number = 500;
 
     int epoch = 3;
     double l1 = 0.00005;
     double l2 = 0.00005;
     double lr = 0.05;
-    int batch_size = 8;
+    int batch_size = 32;
 
-    matrix** train_full_data = get_data("mnist_train.csv", train_numbers);
-    matrix** validation_full_data = get_data("mnist_train.csv", validation_numbers);
+    matrix **train_full_data = get_data("mnist_train.csv", train_numbers);
+    matrix **validation_full_data = get_data("mnist_train.csv", validation_numbers);
 //    pass_line(file);
     for (int p = 0; p < epoch; ++p) {
-        learn_step_optimizerless_paired_array_batch(MNIST_network, lr, train_full_data, train_numbers,  batch_size, l1, l2);
+        learn_step_optimizerless_paired_array_batch(MNIST_network, lr, train_full_data, train_numbers, batch_size, l1,
+                                                    l2);
         test_network_paired(MNIST_network, validation_full_data, validation_numbers);
     }
     free_data(train_full_data, train_numbers);
@@ -139,7 +140,7 @@ void try_train_network() {
 
     printf("\nTEST\n");
 
-    matrix** test_full_data = get_data("mnist_train.csv", test_number);
+    matrix **test_full_data = get_data("mnist_train.csv", test_number);
     test_network_paired(MNIST_network, test_full_data, test_number);
     confusion_matrix_paired(MNIST_network, test_full_data, test_number);
     free_data(test_full_data, test_number);

@@ -9,12 +9,15 @@ typedef struct matrix {
     int i;
     int j;
 } matrix;
-typedef struct coordinates{
+typedef struct coordinates {
     int i;
     int j;
-}coordinates;
+} coordinates;
+
 matrix matrix_multiplication(matrix first_matrix, matrix second_matrix);
+
 double matrix_get_element(matrix matrx, int i, int j);
+
 matrix matrix_transposition(matrix matrix_to_transpose);
 
 matrix matrix_addition(matrix first_matrix, matrix second_matrix);
@@ -30,11 +33,15 @@ matrix matrix_multiplication_elements(matrix first_matrix, matrix second_matrix)
 matrix matrix_creation(int i, int j);
 
 void matrix_print(matrix matrix_to_print);
+
 void matrix_print_with_indexation(matrix matrix_to_print);
 
 void matrix_free(matrix matrix_to_free);
 
+void matrix_free_arrayed(matrix *matrix_array_to_free, int array_size);
+
 matrix matrix_copy(matrix matrix_to_copy);
+
 matrix matrix_copy_activated(matrix matrix_to_copy, void (*active_func)(matrix *));
 
 void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(double));

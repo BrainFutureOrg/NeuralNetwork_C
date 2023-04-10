@@ -27,7 +27,7 @@ matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
     return result;
 }
 
-double matrix_get_element(matrix matrx, int i, int j){
+double matrix_get_element(matrix matrx, int i, int j) {
     return matrx.table[i][j];
 }
 
@@ -49,7 +49,7 @@ matrix matrix_addition(matrix first_matrix, matrix second_matrix) {
     return result;
 }
 
-matrix matrix_addition_inplace(matrix changed_matrix, matrix second_matrix){
+matrix matrix_addition_inplace(matrix changed_matrix, matrix second_matrix) {
     if (changed_matrix.i != second_matrix.i || changed_matrix.j != second_matrix.j) {
         printf("matr add firstmatrix %d x %d secondmatrix %d x %d", changed_matrix.i, changed_matrix.j, second_matrix.i,
                second_matrix.j);
@@ -83,7 +83,7 @@ matrix matrix_copy(matrix matrix_to_copy) {
     return copy;
 }
 
-matrix matrix_copy_activated(matrix matrix_to_copy, void (*active_func)(matrix *)){
+matrix matrix_copy_activated(matrix matrix_to_copy, void (*active_func)(matrix *)) {
     matrix copy = matrix_copy(matrix_to_copy);
     active_func(&copy);
     return copy;
@@ -109,7 +109,7 @@ void matrix_print(matrix matrix_to_print) {
     }
 }
 
-void matrix_print_with_indexation(matrix matrix_to_print){
+void matrix_print_with_indexation(matrix matrix_to_print) {
     printf("    ");
     for (int j = 0; j < matrix_to_print.j; j++) {
         printf("%4d ", j);
@@ -121,7 +121,7 @@ void matrix_print_with_indexation(matrix matrix_to_print){
     printf("\n");
 
     for (int i = 0; i < matrix_to_print.i; i++) {
-        printf("%2d| ",i);
+        printf("%2d| ", i);
         for (int j = 0; j < matrix_to_print.j; j++) {
             printf("%2.2f ", matrix_to_print.table[i][j]);
         }
@@ -134,6 +134,13 @@ void matrix_free(matrix matrix_to_free) {
         free(matrix_to_free.table[i]);
     }
     free(matrix_to_free.table);
+}
+
+void matrix_free_arrayed(matrix *matrix_array_to_free, int array_size) {
+    for (int i = 0; i < array_size; i++) {
+        matrix_free(matrix_array_to_free[i]);
+    }
+    free(matrix_array_to_free);
 }
 
 void matrix_function_to_elements(matrix matrix_for_operation, double (*func)(double)) {
@@ -152,10 +159,10 @@ void matrix_multiply_by_constant(matrix matrix_for_operation, double number) {
     }
 }
 
-void matrix_add_scalar(matrix matrix_for_operation, double scalar){
+void matrix_add_scalar(matrix matrix_for_operation, double scalar) {
     for (int i = 0; i < matrix_for_operation.i; i++) {
         for (int j = 0; j < matrix_for_operation.j; j++) {
-            matrix_for_operation.table[i][j]+=scalar;
+            matrix_for_operation.table[i][j] += scalar;
         }
     }
 }
@@ -189,15 +196,15 @@ matrix matrix_substact(matrix first_matrix, matrix second_matrix) {
     return result;
 }
 
-void matrix_subtract_inplace(matrix changed_matrix, matrix second_matrix){
+void matrix_subtract_inplace(matrix changed_matrix, matrix second_matrix) {
     if (changed_matrix.i != second_matrix.i || changed_matrix.j != second_matrix.j) {
         printf("matr sub firstmatrix %d x %d secondmatrix %d x %d", changed_matrix.i, changed_matrix.j, second_matrix.i,
                second_matrix.j);
         errno = ERANGE;
     }
-    for(int i=0; i<changed_matrix.i; i++){
-        for(int j=0; j<changed_matrix.j; j++){
-            changed_matrix.table[i][j]-=second_matrix.table[i][j];
+    for (int i = 0; i < changed_matrix.i; i++) {
+        for (int j = 0; j < changed_matrix.j; j++) {
+            changed_matrix.table[i][j] -= second_matrix.table[i][j];
         }
     }
 }
@@ -229,47 +236,52 @@ void matrix_restrict(matrix matrix_for_operation, double limit) {
         }
     }
 }
-double frobenius_norm(matrix matrix_for_operation){
-    double sum=0;
-    for(int i=0; i<matrix_for_operation.i; i++){
-        for(int j=0; j<matrix_for_operation.j; j++){
-            sum += pow(matrix_for_operation.table[i][j],2);
+
+double frobenius_norm(matrix matrix_for_operation) {
+    double sum = 0;
+    for (int i = 0; i < matrix_for_operation.i; i++) {
+        for (int j = 0; j < matrix_for_operation.j; j++) {
+            sum += pow(matrix_for_operation.table[i][j], 2);
         }
     }
     return sqrt(sum);
 }
-void frobenius_normalize(matrix matrix_for_operation){
-    matrix_multiply_by_constant(matrix_for_operation, 1/ frobenius_norm(matrix_for_operation));
+
+void frobenius_normalize(matrix matrix_for_operation) {
+    matrix_multiply_by_constant(matrix_for_operation, 1 / frobenius_norm(matrix_for_operation));
 }
-double matrix_max_absolute(matrix matrix_for_operation){
-    double max= fabs(matrix_for_operation.table[0][0]);
-    for(int i=0; matrix_for_operation.i; i++){
-        for(int j=0; j<matrix_for_operation.j; j++){
-            if(max < fabs(matrix_for_operation.table[i][j]))max= fabs(matrix_for_operation.table[i][j]);
+
+double matrix_max_absolute(matrix matrix_for_operation) {
+    double max = fabs(matrix_for_operation.table[0][0]);
+    for (int i = 0; matrix_for_operation.i; i++) {
+        for (int j = 0; j < matrix_for_operation.j; j++) {
+            if (max < fabs(matrix_for_operation.table[i][j]))max = fabs(matrix_for_operation.table[i][j]);
         }
     }
     return max;
 }
-void max_abs_normalize(matrix matrix_for_operation){
-    matrix_multiply_by_constant(matrix_for_operation, 1/ matrix_max_absolute(matrix_for_operation));
+
+void max_abs_normalize(matrix matrix_for_operation) {
+    matrix_multiply_by_constant(matrix_for_operation, 1 / matrix_max_absolute(matrix_for_operation));
 }
 
-coordinates matrix_argmax(matrix matrix_for_operation){
+coordinates matrix_argmax(matrix matrix_for_operation) {
     coordinates result;
-    result.i=result.j=0;
-    double max_elem= matrix_get_element(matrix_for_operation, 0, 0);
-    for(int i=0; i<matrix_for_operation.i; i++){
-        for(int j=0; j<matrix_for_operation.j; j++){
-            double element=matrix_get_element(matrix_for_operation,i,j);
-            if(element>max_elem) {
+    result.i = result.j = 0;
+    double max_elem = matrix_get_element(matrix_for_operation, 0, 0);
+    for (int i = 0; i < matrix_for_operation.i; i++) {
+        for (int j = 0; j < matrix_for_operation.j; j++) {
+            double element = matrix_get_element(matrix_for_operation, i, j);
+            if (element > max_elem) {
                 max_elem = element;
-                result.i=i;
-                result.j=j;
+                result.i = i;
+                result.j = j;
             }
         }
     }
     return result;
 }
-char coordinates_equals(coordinates coordinates1, coordinates coordinates2){
+
+char coordinates_equals(coordinates coordinates1, coordinates coordinates2) {
     return coordinates1.i == coordinates2.i && coordinates1.j == coordinates2.j ? 1 : 0;
 }
