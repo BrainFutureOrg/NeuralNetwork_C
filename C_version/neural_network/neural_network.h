@@ -6,6 +6,7 @@
 #define C_VERSION_NEURAL_NETWORK_H
 
 #include "../matrix_operations.h"
+#include "regularization_params.h"
 
 typedef enum {
     ReLu,
@@ -29,14 +30,18 @@ typedef struct neural_network {
 
     void (*activation_function_derivative)(matrix *);
 
+    regularization_params regularization_params;
+
     struct neural_network *next_layer;
 
     struct neural_network *previous_layer;
 } neural_network;
 
+
 network_start_layer create_network(int neuron_numbers);
 
-void add_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name);
+void add_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name,
+               regularization_params regularization);
 
 void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer);
 
@@ -52,7 +57,7 @@ void print_network(network_start_layer network);
 
 void free_network(network_start_layer startLayer);
 
-void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
+/*void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
                               matrix result_layer, double l1, double l2);
 
 void learn_step_optimizerless_array(network_start_layer network, double learning_rate, matrix *start_layer,

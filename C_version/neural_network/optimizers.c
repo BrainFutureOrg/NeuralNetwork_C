@@ -11,8 +11,7 @@ double signum(double a) {
     return a > 0 ? 1 : a < 0 ? -1 : 0;
 }
 
-void gradient_descent(neural_network *layer, matrix error, double learning_rate, matrix previous_values, double l1,
-                      double l2) {
+void gradient_descent(neural_network *layer, matrix error, double learning_rate, matrix previous_values, int epoch) {
     matrix multiplied = matrix_copy(error);
     matrix_multiply_by_constant(multiplied, learning_rate);
     matrix new_bias = matrix_substact(layer->bias, multiplied);//+-
@@ -32,10 +31,10 @@ void gradient_descent(neural_network *layer, matrix error, double learning_rate,
 
     matrix l1_mtrx = matrix_copy(layer->weights);
     matrix_function_to_elements(l1_mtrx, signum);
-    matrix_multiply_by_constant(l1_mtrx, l1);
+    matrix_multiply_by_constant(l1_mtrx, layer->regularization_params.l1(epoch));
 
     matrix l2_mtrx = matrix_copy(layer->weights);
-    matrix_multiply_by_constant(l2_mtrx, l2);
+    matrix_multiply_by_constant(l2_mtrx, layer->regularization_params.l2(epoch));
 
     matrix_subtract_inplace(new_weights, l1_mtrx);
     matrix_subtract_inplace(new_weights, l2_mtrx);
@@ -48,7 +47,7 @@ void gradient_descent(neural_network *layer, matrix error, double learning_rate,
 }
 
 void gradient_descent_batch(neural_network *layer, matrix *error, int batch_size, double learning_rate,
-                            matrix **previous_values, int number_of_current_layer, double l1, double l2) {
+                            matrix **previous_values, int number_of_current_layer, int epoch) {
     matrix new_weights = matrix_copy(layer->weights);
     matrix new_bias = matrix_copy(layer->bias);
     for (int i = 0; i < batch_size; i++) {
@@ -72,10 +71,10 @@ void gradient_descent_batch(neural_network *layer, matrix *error, int batch_size
 
     matrix l1_mtrx = matrix_copy(layer->weights);
     matrix_function_to_elements(l1_mtrx, signum);
-    matrix_multiply_by_constant(l1_mtrx, l1);
+    matrix_multiply_by_constant(l1_mtrx, layer->regularization_params.l1(epoch));
 
     matrix l2_mtrx = matrix_copy(layer->weights);
-    matrix_multiply_by_constant(l2_mtrx, l2);
+    matrix_multiply_by_constant(l2_mtrx, layer->regularization_params.l2(epoch));
 
     matrix_subtract_inplace(new_weights, l1_mtrx);
     matrix_subtract_inplace(new_weights, l2_mtrx);
@@ -89,7 +88,7 @@ void gradient_descent_batch(neural_network *layer, matrix *error, int batch_size
     matrix_free(l2_mtrx);
 }
 
-weight_bias
+/*weight_bias
 gradient_descent_delta(neural_network *layer, matrix error, double learning_rate, matrix previous_values, double l1,
                        double l2) {
     weight_bias result;
@@ -120,9 +119,9 @@ gradient_descent_delta(neural_network *layer, matrix error, double learning_rate
     matrix_free(l2_mtrx);
     result.weight = multiplied;
     return result;
-}
+}*/
 
-void
+/*void
 gradient_descent_dual(neural_network *original_layer, neural_network *changed_layer, matrix error, double learning_rate,
                       matrix previous_values, double l1, double l2) {
     matrix multiplied = matrix_copy(error);
@@ -157,4 +156,4 @@ gradient_descent_dual(neural_network *original_layer, neural_network *changed_la
     matrix_free(multiplied);
     matrix_free(l1_mtrx);
     matrix_free(l2_mtrx);
-}
+}*/

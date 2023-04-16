@@ -398,10 +398,22 @@ double mse_loss(network_start_layer network, matrix *start_layers, int sample_nu
     return sum / sample_number;
 }
 
+double many_loss(network_start_layer network, matrix *start_layers, int sample_number, matrix *expected_results,
+                 general_regularization_params general_regularization) {
+    double sum = 0;
+    for (int i = 0; i < sample_number; i++) {
+        matrix real_results = predict(network, start_layers[i]);
+        sum += general_regularization.cost_function(real_results, expected_results[i]) / sample_number;
+        matrix_free(real_results);
+    }
+    return sum;
+}
+
 void test_network(network_start_layer network, matrix *start_layers, int start_layer_number, matrix *expected_results,
                   general_regularization_params general_regularization) {
     double accuracy_num = accuracy(network, start_layers, expected_results, start_layer_number);
-    double loss_num = mse_loss(network, start_layers, start_layer_number, expected_results);
+    //double loss_num = mse_loss(network, start_layers, start_layer_number, expected_results);
+    double loss_num = many_loss(network, start_layers, start_layer_number, expected_results, general_regularization);
     printf("accuracy: %f, loss: %f\n", accuracy_num, loss_num);
 }
 
