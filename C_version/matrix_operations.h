@@ -34,7 +34,7 @@ matrix matrix_creation(int i, int j);
 
 void matrix_print(matrix matrix_to_print);
 
-void matrix_print_with_indexation(matrix matrix_to_print);
+void matrix_print_with_indexation(matrix matrix_to_print, int integer_allocate, int fraction_allocate);
 
 void matrix_free(matrix matrix_to_free);
 

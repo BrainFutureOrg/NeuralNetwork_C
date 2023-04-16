@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include "matrix_operations.h"
 #include <math.h>
+#include "data/my_print.h"
+
 
 matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
     matrix result;
@@ -16,11 +18,15 @@ matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
         return result;
     }
     result = matrix_creation(first_matrix.i, second_matrix.j);
-    for (int i = 0; i < first_matrix.i; i++) {
-        for (int j = 0; j < second_matrix.j; j++) {
-            result.table[i][j] = 0;
-            for (int i2 = 0; i2 < first_matrix.j; i2++) {
-                result.table[i][j] += first_matrix.table[i][i2] * second_matrix.table[i2][j];
+#pragma omp parallel shared(first_matrix, second_matrix, result) default(none)
+    {
+#pragma omp for
+        for (int i = 0; i < first_matrix.i; i++) {
+            for (int j = 0; j < second_matrix.j; j++) {
+                result.table[i][j] = 0;
+                for (int i2 = 0; i2 < first_matrix.j; i2++) {
+                    result.table[i][j] += first_matrix.table[i][i2] * second_matrix.table[i2][j];
+                }
             }
         }
     }
@@ -109,21 +115,26 @@ void matrix_print(matrix matrix_to_print) {
     }
 }
 
-void matrix_print_with_indexation(matrix matrix_to_print) {
+void matrix_print_with_indexation(matrix matrix_to_print, int integer_allocate, int fraction_allocate) {
     printf("    ");
+    int len = integer_allocate + fraction_allocate;
     for (int j = 0; j < matrix_to_print.j; j++) {
-        printf("%4d ", j);
+        print_double_number(j, len, 0);
+        putchar(' ');
     }
-    printf("\n    ");
+    printf("\n   ");
     for (int j = 0; j < matrix_to_print.j; j++) {
-        printf("_____");
+        for (int i = 0; i < len + 1; ++i) {
+            putchar('_');
+        }
     }
     printf("\n");
 
     for (int i = 0; i < matrix_to_print.i; i++) {
         printf("%2d| ", i);
         for (int j = 0; j < matrix_to_print.j; j++) {
-            printf("%2.2f ", matrix_to_print.table[i][j]);
+            print_double_number(matrix_to_print.table[i][j], integer_allocate, fraction_allocate);
+            putchar(' ');
         }
         printf("\n");
     }
