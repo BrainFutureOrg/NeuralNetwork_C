@@ -5,8 +5,8 @@
 #ifndef C_VERSION_NEURAL_NETWORK_H
 #define C_VERSION_NEURAL_NETWORK_H
 
-#include "../matrix_operations.h"
-#include "regularization_params.h"
+#include "../math/matrix_operations.h"
+#include "neural_structs.h"
 
 typedef enum {
     ReLu,
@@ -14,28 +14,6 @@ typedef enum {
     Sigmoid,
     Tangential
 } activation_function_names;
-
-typedef struct network_start_layer {
-    int i;
-
-    struct neural_network *next_layer;
-} network_start_layer;
-
-typedef struct neural_network {
-    matrix weights;
-
-    matrix bias;
-
-    void (*activation_function)(matrix *);
-
-    void (*activation_function_derivative)(matrix *);
-
-    regularization_params regularization_params;
-
-    struct neural_network *next_layer;
-
-    struct neural_network *previous_layer;
-} neural_network;
 
 
 network_start_layer create_network(int neuron_numbers);

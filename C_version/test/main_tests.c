@@ -5,7 +5,7 @@
 #include "main_tests.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../matrix_operations.h"
+#include "../math/matrix_operations.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <time.h>

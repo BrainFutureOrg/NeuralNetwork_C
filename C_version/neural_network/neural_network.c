@@ -3,10 +3,9 @@
 //
 
 #include "neural_network.h"
-#include "network_activation_functions.h"
-#include "optimizers.h"
-#include "../matrix_operations.h"
-#include "../statistical_random.h"
+#include "activation_functions/network_activation_functions.h"
+#include "../math/matrix_operations.h"
+#include "../math/statistical_random.h"
 #include <stdlib.h>
 #include <math.h>
 #include <limits.h>
@@ -42,14 +41,6 @@ void add_function_with_derivative(neural_network *network_layer, activation_func
     }
 }
 
-neural_network *last_layer(network_start_layer network) {
-    neural_network *current = network.next_layer;
-    if (current == NULL) return current;
-    while (current->next_layer != NULL) {
-        current = current->next_layer;
-    }
-    return current;
-}
 
 network_start_layer create_network(int neuron_numbers) {
     network_start_layer result;
@@ -60,53 +51,59 @@ network_start_layer create_network(int neuron_numbers) {
 
 void add_after_start_layer(network_start_layer *network, int neuron_numbers,
                            activation_function_names activation_function_name, regularization_params regularization) {
-    network->next_layer = calloc(1, sizeof(neural_network));
-    matrix weighs = matrix_creation(neuron_numbers, network->i);
-    for (int i = 0; i < weighs.i; i++) {
-        for (int j = 0; j < weighs.j; j++) {
-            weighs.table[i][j] = randn();
-        }
-    }
+    neural_network *new_layer = calloc(1, sizeof(neural_network));
+    network->next_layer = NULL;
+//    matrix weighs = matrix_creation(neuron_numbers, network->i);
+//    for (int i = 0; i < weighs.i; i++) {
+//        for (int j = 0; j < weighs.j; j++) {
+//            weighs.table[i][j] = randn();
+//        }
+//    }
 
     matrix bias = matrix_creation(neuron_numbers, 1);
     for (int i = 0; i < bias.i; i++) {
         bias.table[i][0] = randn();
     }
 
-    network->next_layer->weights = weighs;
-    network->next_layer->bias = bias;
-    network->next_layer->next_layer = NULL;
-    network->next_layer->previous_layer = NULL;
-    network->next_layer->regularization_params = regularization;
-    add_function_with_derivative(network->next_layer, activation_function_name);
+    new_layer->weights = regularization.weight_initializ(network, neuron_numbers);
+//    matrix_print(new_layer->weights);
+//    network->next_layer->weights = weighs;
+    new_layer->bias = bias;
+    new_layer->next_layer = NULL;
+    new_layer->previous_layer = NULL;
+    new_layer->regularization_params = regularization;
+    add_function_with_derivative(new_layer, activation_function_name);
+    network->next_layer = new_layer;
 }
 
 void
 add_after_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name,
                 regularization_params regularization) {
+    neural_network *new_layer = calloc(1, sizeof(neural_network));
     neural_network *current = network->next_layer;
     while (current->next_layer != NULL) {
         current = current->next_layer;
     }
-    current->next_layer = calloc(1, sizeof(neural_network));
-    matrix weighs = matrix_creation(neuron_numbers, current->weights.i);
-    for (int i = 0; i < weighs.i; i++) {
-        for (int j = 0; j < weighs.j; j++) {
-            weighs.table[i][j] = randn();
-        }
-    }
+//    matrix weighs = matrix_creation(neuron_numbers, current->weights.i);
+//    for (int i = 0; i < weighs.i; i++) {
+//        for (int j = 0; j < weighs.j; j++) {
+//            weighs.table[i][j] = randn();
+//        }
+//    }
 
     matrix bias = matrix_creation(neuron_numbers, 1);
     for (int i = 0; i < bias.i; i++) {
         bias.table[i][0] = randn();
     }
-    current->next_layer->bias = bias;
-
-    current->next_layer->weights = weighs;
-    current->next_layer->next_layer = NULL;
-    current->next_layer->previous_layer = current;
-    current->next_layer->regularization_params = regularization;
-    add_function_with_derivative(current->next_layer, activation_function_name);
+    new_layer->bias = bias;
+    new_layer->weights = regularization.weight_initializ(network, neuron_numbers);
+//    matrix_print(current->next_layer->weights);
+//    current->next_layer->weights = weighs;
+    new_layer->next_layer = NULL;
+    new_layer->previous_layer = current;
+    new_layer->regularization_params = regularization;
+    add_function_with_derivative(new_layer, activation_function_name);
+    current->next_layer = new_layer;
 }
 
 void add_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name,
@@ -118,175 +115,6 @@ void add_layer(network_start_layer *network, int neuron_numbers, activation_func
     }
 }
 
-int count_hidden_layers(network_start_layer network) {
-    neural_network *current = network.next_layer;
-    int result = 0;
-    while (current != NULL) {
-        current = current->next_layer;
-        result++;
-    }
-    return result;
-}
-
-matrix *predict_all_layers(network_start_layer network, matrix start_layer) {
-    int layers_number = count_hidden_layers(network);
-    neural_network *current = network.next_layer;
-    matrix *current_results = calloc(layers_number + 1, sizeof(matrix));
-    matrix activated_results = matrix_copy(start_layer);
-    current_results[0] = matrix_copy(start_layer);
-    for (int i = 1; i < layers_number + 1; i++) {
-        current_results[i] = matrix_multiplication(current->weights, activated_results);
-        matrix_free(activated_results);
-        activated_results = matrix_addition(current_results[i], current->bias);
-        current->activation_function(&activated_results);
-        current = current->next_layer;
-    }
-    matrix_free(activated_results);
-    return current_results;
-}
-
-matrix **predict_all_layers_batch(network_start_layer network, matrix *start_layers, int batch_size) {
-    matrix **predictions_batched = calloc(batch_size, sizeof(matrix *));
-    for (int i = 0; i < batch_size; i++) {
-        predictions_batched[i] = predict_all_layers(network, start_layers[i]);
-    }
-    return predictions_batched;
-}
-
-/*void learn_step_optimizerless(network_start_layer network, double learning_rate, matrix start_layer,
-                              matrix result_layer, int epoch) {
-    matrix *prediction = predict_all_layers(network, start_layer);
-    neural_network *current = last_layer(network);
-    int network_layer_number = count_hidden_layers(network);
-
-    matrix derived_results = matrix_copy_activated(prediction[network_layer_number], current->activation_function);
-    matrix nablaC = matrix_substact(derived_results, result_layer);
-    matrix_free(derived_results);
-
-    derived_results = matrix_copy_activated(prediction[network_layer_number], current->activation_function_derivative);
-
-    matrix dL = matrix_multiplication_elements(nablaC, derived_results);
-    matrix_free(nablaC);
-    matrix_free(derived_results);
-    matrix dl = dL;
-    for (int i = network_layer_number - 1; i >= 0; i--) {
-        gradient_descent(current, dl, learning_rate, prediction[i], epoch);
-        matrix transposed = matrix_transposition(current->weights);
-        current = current->previous_layer;
-        matrix multiplied = matrix_multiplication(transposed, dl);
-        matrix_free(transposed);
-        derived_results = matrix_copy(prediction[i]);//invalid read
-        if (current != NULL) {
-            current->activation_function_derivative(&derived_results);
-        }
-        matrix_free(dl);
-        dl = matrix_multiplication_elements(multiplied, derived_results);
-        matrix_free(derived_results);
-        matrix_free(multiplied);
-    }
-    matrix_free(dl);
-    for (int i = network_layer_number; i >= 0; i--)
-        matrix_free(prediction[i]);
-    free(prediction);
-}*/
-
-/*void learn_step_optimizerless_array(network_start_layer network, double learning_rate, matrix *start_layer,
-                                    matrix *result_layer, int sample_number, double l1, double l2) {
-    for (int i = 0; i < sample_number; i++) {
-        learn_step_optimizerless(network, learning_rate, start_layer[i], result_layer[i], l1, l2);
-    }
-}
-
-void
-learn_step_optimizerless_paired_array(network_start_layer network, double learning_rate, matrix **start_result_layer,
-                                      int sample_number,
-                                      double l1, double l2) {
-    learn_step_optimizerless_array(network, learning_rate, start_result_layer[0], start_result_layer[1], sample_number,
-                                   l1, l2);
-}*/
-
-void learn_step_optimizerless_batch(network_start_layer network, double learning_rate, matrix *start_layers,
-                                    matrix *result_layers, int batch_size,
-                                    int epoch, general_regularization_params general_regularizations) {
-    matrix **prediction = predict_all_layers_batch(network, start_layers, batch_size);
-    neural_network *current = last_layer(network);
-    int network_layer_number = count_hidden_layers(network);
-    matrix *dl = calloc(batch_size, sizeof(matrix));
-
-    for (int i = 0; i < batch_size; i++) {
-        matrix derived_results = matrix_copy_activated(prediction[i][network_layer_number],
-                                                       current->activation_function);
-        //matrix nablaC = matrix_substact(derived_results, result_layers[i]);//TODO cross entropy
-        matrix nablaC = general_regularizations.nablaC(derived_results, result_layers[i]);
-        matrix_free(derived_results);
-
-        derived_results = matrix_copy_activated(prediction[i][network_layer_number],
-                                                current->activation_function_derivative);
-
-        dl[i] = matrix_multiplication_elements(nablaC, derived_results);
-        matrix_free(nablaC);
-        matrix_free(derived_results);
-    }
-    for (int i = network_layer_number - 1; i >= 0; i--) {
-        gradient_descent_batch(current, dl, batch_size, learning_rate, prediction, i, epoch);
-        matrix transposed = matrix_transposition(current->weights);
-        current = current->previous_layer;
-        for (int j = 0; j < batch_size; j++) {
-            matrix multiplied = matrix_multiplication(transposed, dl[j]);
-            matrix derived_results = matrix_copy(prediction[j][i]);
-            if (current != NULL) {
-                current->activation_function_derivative(&derived_results);
-            }
-            matrix_free(dl[j]);
-            dl[j] = matrix_multiplication_elements(multiplied, derived_results);
-            matrix_free(derived_results);
-            matrix_free(multiplied);
-        }
-        matrix_free(transposed);
-    }
-    matrix_free_arrayed(dl, batch_size);
-    for (int i = 0; i < batch_size; i++)
-        matrix_free_arrayed(prediction[i], network_layer_number + 1);
-    free(prediction);
-}
-
-void learn_step_optimizerless_array_batch(network_start_layer network, double learning_rate, matrix *start_layer,
-                                          matrix *result_layer, int sample_number,
-                                          general_regularization_params general_regularization,
-                                          int epoch) {
-    for (int i = 0; i < sample_number / general_regularization.batch_size; i++) {
-        matrix *start_layers = calloc(general_regularization.batch_size, sizeof(matrix));
-        matrix *result_layers = calloc(general_regularization.batch_size, sizeof(matrix));
-        for (int j = 0; j < general_regularization.batch_size; j++) {
-            start_layers[j] = start_layer[i * general_regularization.batch_size + j];
-            result_layers[j] = result_layer[i * general_regularization.batch_size + j];
-        }
-        learn_step_optimizerless_batch(network, learning_rate, start_layers, result_layers,
-                                       general_regularization.batch_size, epoch, general_regularization);
-        free(start_layers);
-        free(result_layers);
-    }
-    matrix *start_layers = calloc(sample_number % general_regularization.batch_size, sizeof(matrix));
-    matrix *result_layers = calloc(sample_number % general_regularization.batch_size, sizeof(matrix));
-    for (int j = 0; j < sample_number % general_regularization.batch_size; j++) {
-        start_layers[j] = start_layer[
-                (sample_number / general_regularization.batch_size) * general_regularization.batch_size + j];
-        result_layers[j] = result_layer[
-                (sample_number / general_regularization.batch_size) * general_regularization.batch_size + j];
-    }
-    learn_step_optimizerless_batch(network, learning_rate, start_layers, result_layers,
-                                   sample_number % general_regularization.batch_size, epoch, general_regularization);
-    free(start_layers);
-    free(result_layers);
-}
-
-void learn_step_optimizerless_paired_array_batch(network_start_layer network, double learning_rate,
-                                                 matrix **start_result_layer, int sample_number,
-                                                 general_regularization_params general_regularization,
-                                                 int epoch) {
-    learn_step_optimizerless_array_batch(network, learning_rate, start_result_layer[0], start_result_layer[1],
-                                         sample_number, general_regularization, epoch);
-}
 
 void print_network(network_start_layer network) {
     printf("startlayer\n");

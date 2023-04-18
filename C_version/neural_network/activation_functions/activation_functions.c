@@ -4,7 +4,7 @@
 
 #include "activation_functions.h"
 #include <math.h>
-#include "../matrix_operations.h"
+#include "../../math/matrix_operations.h"
 #include <limits.h>
 #include <float.h>
 

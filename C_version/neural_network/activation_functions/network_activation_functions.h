@@ -5,7 +5,7 @@
 #ifndef C_VERSION_NETWORK_ACTIVATION_FUNCTIONS_H
 #define C_VERSION_NETWORK_ACTIVATION_FUNCTIONS_H
 
-#include "../matrix_operations.h"
+#include "../../math/matrix_operations.h"
 
 void network_sigmoid(matrix *M);
 

@@ -1,13 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrix_operations.h"
+#include "math/matrix_operations.h"
 #include <errno.h>
 #include <stdlib.h>
+#include "neural_network/weight_initialize/weight_initializers.h"
 #include <time.h>
 //#include <math.h>
 #include "neural_network/neural_network.h"
 #include "data/DAO.h"
-#include "neural_network/regularization_params.h"
+#include "neural_network/regularization/regularization_params.h"
+
+#include "neural_network/Optimizers/SGD.h"
+#include "neural_network/Optimizers/momentum_optimizer.h"
+#include "neural_network/Optimizers/Nesterov_accelerated_gd.h"
 
 #define check_error_void if(errno!=0) return;
 #define check_error_main if(errno!=0) { print_error(); return 0; }
@@ -18,14 +23,18 @@ void print_error();
 
 void try_train_network();
 
+void try_train_momentum();
+
+void try_train_nesterov();
+
 double l1l2(int epoch) {
-    if (epoch < 5)
-        return 0.0001;
+    if (epoch < 7)
+        return 0.0005;
     if (epoch < 8)
-        return 0.00001;
+        return 0.0003;
     if (epoch < 9)
-        return 0.000005;
-    return 0.00005;
+        return 0.00001;
+    return 0.0000005;
 }
 
 double lr(int epoch_number) {
@@ -43,6 +52,8 @@ network_start_layer initialise_network() {
     regularization_params regularization;
     regularization.l1 = l1l2;
     regularization.l2 = l1l2;
+    set_weights(&regularization, XAVIER_NORMALIZED);
+
     add_layer(&network, 300, Sigmoid, regularization);
     add_layer(&network, 10, Sigmoid, regularization);
     return network;
@@ -53,7 +64,9 @@ int main() {
 //    check_matrix_print();
     //check_learning();
 //    check_DAO();
-    try_train_network();
+//    try_train_network();
+    //try_train_momentum();
+    try_train_nesterov();
     check_error_main
     return 0;
 }
@@ -107,13 +120,11 @@ void try_train_network() {
     network_start_layer MNIST_network = initialise_network();
 //    matrix_print(MNIST_network.next_layer->bias);
 //    matrix_print(MNIST_network.next_layer->weights);
-    FILE *file;
+    int train_numbers = 50;
+    int validation_numbers = 50;
+    int test_number = 50;
 
-    int train_numbers = 5000;
-    int validation_numbers = 5000;
-    int test_number = 500;
-
-    int epoch = 10;
+    int epoch = 3;
     //double l1 = 0.0005;
     //double l2 = 0.0005;
 //    double lr = 0.05;
@@ -128,6 +139,45 @@ void try_train_network() {
     for (int p = 0; p < epoch; ++p) {
         learn_step_optimizerless_paired_array_batch(MNIST_network, lr(p), train_full_data, train_numbers,
                                                     gereral_regularization, p);
+        test_network_paired(MNIST_network, validation_full_data, validation_numbers, gereral_regularization);
+    }
+    free_data(train_full_data, train_numbers);
+    free_data(validation_full_data, validation_numbers);
+
+    printf("\nTEST\n");
+
+    matrix **test_full_data = get_data("mnist_test.csv", test_number);
+    test_network_paired(MNIST_network, test_full_data, test_number, gereral_regularization);
+    confusion_matrix_paired(MNIST_network, test_full_data, test_number);
+    free_data(test_full_data, test_number);
+    free_network(MNIST_network);
+}
+
+void try_train_momentum() {
+
+    network_start_layer MNIST_network = initialise_network();
+//    matrix_print(MNIST_network.next_layer->bias);
+//    matrix_print(MNIST_network.next_layer->weights);
+    int train_numbers = 500;
+    int validation_numbers = 500;
+    int test_number = 5000;
+
+    int epoch = 10;
+    //double l1 = 0.0005;
+    //double l2 = 0.0005;
+//    double lr = 0.05;
+    int batch_size = 32;
+    double friction = 0.9;
+
+    general_regularization_params gereral_regularization;
+    gereral_regularization.batch_size = batch_size;
+    paste_cost(&gereral_regularization, cross_entropy);
+    matrix **train_full_data = get_data("mnist_train.csv", train_numbers);
+    matrix **validation_full_data = get_data("mnist_train.csv", validation_numbers);
+//    pass_line(file);
+    for (int p = 0; p < epoch; ++p) {
+        learn_step_momentum_paired_array_batch(MNIST_network, lr(p), train_full_data, train_numbers,
+                                               gereral_regularization, p, friction);
         test_network_paired(MNIST_network, validation_full_data, validation_numbers, gereral_regularization);
     }
     free_data(train_full_data, train_numbers);

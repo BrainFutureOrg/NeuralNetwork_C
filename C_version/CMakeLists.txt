@@ -11,6 +11,6 @@ if (OPENMP_FOUND)
 endif ()
 
 
-add_executable(C_version main.c matrix_operations.c matrix_operations.h neural_network/activation_functions.c neural_network/activation_functions.h neural_network/neural_network.c neural_network/neural_network.h neural_network/network_activation_functions.c neural_network/network_activation_functions.h data/DAO.c data/DAO.h neural_network/optimizers.c neural_network/optimizers.h statistical_random.c statistical_random.h data/my_print.h data/my_print.c neural_network/regularization_params.c neural_network/regularization_params.h test/main_tests.c test/main_tests.h neural_network/losses.c neural_network/losses.h)
+add_executable(C_version main.c neural_network/neural_network.c neural_network/weight_initialize/weight_initializers.c neural_network/regularization/losses.c neural_network/regularization/regularization_params.c test/main_tests.c neural_network/Optimizers/momentum_optimizer.c neural_network/Optimizers/optimizers_functions.c neural_network/Optimizers/SGD.c neural_network/activation_functions/activation_functions.c neural_network/activation_functions/network_activation_functions.c math/matrix_operations.c math/statistical_random.c data/my_print.c data/DAO.c neural_network/neural_structs.h neural_network/Optimizers/Nesterov_accelerated_gd.c neural_network/Optimizers/Nesterov_accelerated_gd.h)
 
 target_link_libraries(C_version m)

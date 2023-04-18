@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "matrix_operations.h"
 #include <math.h>
-#include "data/my_print.h"
+#include "../data/my_print.h"
 
 
 matrix matrix_multiplication(matrix first_matrix, matrix second_matrix) {
