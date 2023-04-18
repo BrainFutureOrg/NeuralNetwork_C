@@ -21,7 +21,7 @@ network_start_layer create_network(int neuron_numbers);
 void add_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name,
                regularization_params regularization);
 
-void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer);
+//void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer);
 
 matrix predict(network_start_layer network, matrix start_layer);
 
@@ -50,15 +50,7 @@ learn_step_optimizerless_paired_array(network_start_layer network, double learni
                                     matrix *result_layers, int batch_size,
                                     int epoch);
 */
-void learn_step_optimizerless_array_batch(network_start_layer network, double learning_rate, matrix *start_layer,
-                                          matrix *result_layer, int sample_number,
-                                          general_regularization_params general_regularization,
-                                          int epoch);
 
-void learn_step_optimizerless_paired_array_batch(network_start_layer network, double learning_rate,
-                                                 matrix **start_result_layer, int sample_number,
-                                                 general_regularization_params general_regularization,
-                                                 int epoch);
 
 double mse_loss(network_start_layer network, matrix *start_layers, int sample_number, matrix *expected_results);
 

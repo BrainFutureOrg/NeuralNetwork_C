@@ -55,7 +55,7 @@ matrix matrix_addition(matrix first_matrix, matrix second_matrix) {
     return result;
 }
 
-matrix matrix_addition_inplace(matrix changed_matrix, matrix second_matrix) {
+void matrix_addition_inplace(matrix changed_matrix, matrix second_matrix) {
     if (changed_matrix.i != second_matrix.i || changed_matrix.j != second_matrix.j) {
         printf("matr add firstmatrix %d x %d secondmatrix %d x %d", changed_matrix.i, changed_matrix.j, second_matrix.i,
                second_matrix.j);

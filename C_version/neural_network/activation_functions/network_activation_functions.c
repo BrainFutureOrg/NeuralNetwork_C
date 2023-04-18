@@ -4,7 +4,7 @@
 
 #include "network_activation_functions.h"
 #include "activation_functions.h"
-#include "../matrix_operations.h"
+#include "../../math/matrix_operations.h"
 
 void network_sigmoid(matrix *M) {
     matrix_function_to_elements(*M, sigmoid);

@@ -5,7 +5,7 @@
 #ifndef C_VERSION_ACTIVATION_FUNCTIONS_H
 #define C_VERSION_ACTIVATION_FUNCTIONS_H
 
-#include "../matrix_operations.h"
+#include "../../math/matrix_operations.h"
 #include <math.h>
 
 double sigmoid(double x);
