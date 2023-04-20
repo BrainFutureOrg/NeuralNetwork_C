@@ -13,6 +13,7 @@
 #include "neural_network/Optimizers/SGD.h"
 #include "neural_network/Optimizers/momentum_optimizer.h"
 #include "neural_network/Optimizers/Nesterov_accelerated_gd.h"
+#include "neural_network/Optimizers/Adam_optimizer.h"
 
 #define check_error_void if(errno!=0) return;
 #define check_error_main if(errno!=0) { print_error(); return 0; }
@@ -27,19 +28,21 @@ void try_train_momentum();
 
 void try_train_nesterov();
 
+void try_train_adam();
+
 double l1l2(int epoch) {
     if (epoch < 7)
-        return 0.0005;
+        return 0.00005;
     if (epoch < 8)
-        return 0.0003;
+        return 0.00003;
     if (epoch < 9)
-        return 0.00001;
-    return 0.0000005;
+        return 0.000001;
+    return 0.00000005;
 }
 
 double lr(int epoch_number) {
     if (epoch_number < 6)
-        return 0.0002;
+        return 0.0003;
     if (epoch_number < 8)
         return 0.0001;
     if (epoch_number < 9)
@@ -66,7 +69,8 @@ int main() {
 //    check_DAO();
 //    try_train_network();
     //try_train_momentum();
-    try_train_nesterov();
+    //try_train_nesterov();
+    try_train_adam();
     check_error_main
     return 0;
 }
@@ -214,6 +218,44 @@ void try_train_nesterov() {
     for (int p = 0; p < epoch; ++p) {
         learn_step_nesterov_paired_array_batch(MNIST_network, lr(p), train_full_data, train_numbers,
                                                gereral_regularization, p, friction);
+        test_network_paired(MNIST_network, validation_full_data, validation_numbers, gereral_regularization);
+    }
+    free_data(train_full_data, train_numbers);
+    free_data(validation_full_data, validation_numbers);
+
+    printf("\nTEST\n");
+
+    matrix **test_full_data = get_data("mnist_test.csv", test_number);
+    test_network_paired(MNIST_network, test_full_data, test_number, gereral_regularization);
+    confusion_matrix_paired(MNIST_network, test_full_data, test_number);
+    free_data(test_full_data, test_number);
+    free_network(MNIST_network);
+}
+
+void try_train_adam() {
+
+    network_start_layer MNIST_network = initialise_network();
+//    matrix_print(MNIST_network.next_layer->bias);
+//    matrix_print(MNIST_network.next_layer->weights);
+    int train_numbers = 5000;
+    int validation_numbers = 5000;
+    int test_number = 5000;
+
+    int epoch = 10;
+    int batch_size = 32;
+    double b1 = 0.9;
+    double b2 = 0.999;
+
+    general_regularization_params gereral_regularization;
+    gereral_regularization.batch_size = batch_size;
+    paste_cost(&gereral_regularization, cross_entropy);
+    matrix **train_full_data = get_data("mnist_train.csv", train_numbers);
+    matrix **validation_full_data = get_data("mnist_train.csv", validation_numbers);
+//    pass_line(file);
+    for (int p = 0; p < epoch; ++p) {
+        learn_step_adam_paired_array_batch(MNIST_network, lr(p), train_full_data, train_numbers,
+                                           gereral_regularization, p, b1, b2);
+
         test_network_paired(MNIST_network, validation_full_data, validation_numbers, gereral_regularization);
     }
     free_data(train_full_data, train_numbers);
