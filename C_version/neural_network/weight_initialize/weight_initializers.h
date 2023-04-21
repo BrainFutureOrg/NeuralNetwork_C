@@ -11,7 +11,8 @@ enum weight_init {
     GAUSSIAN,
     XAVIER,
     XAVIER_NORMALIZED,
-    HE_WEIGHT_INITIALIZATION
+    HE_WEIGHT_INITIALIZATION,
+    NULL_WEIGHT_INITIALIZATION
 };
 
 void set_weights(regularization_params *params, enum weight_init weight_name);

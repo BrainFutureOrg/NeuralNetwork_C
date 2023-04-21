@@ -49,6 +49,20 @@ matrix xavier_weight_initialization(network_start_layer *network, int neuron_num
     return weighs;
 }
 
+matrix null_weight_initialization(network_start_layer *network, int neuron_numbers) {
+
+    int n = find_n(network);
+
+    matrix weighs = matrix_creation(neuron_numbers, n);
+    for (int i = 0; i < weighs.i; i++) {
+        for (int j = 0; j < weighs.j; j++) {
+            weighs.table[i][j] = 0;
+        }
+    }
+
+    return weighs;
+}
+
 matrix xavier_normalized_weight_initialization(network_start_layer *network, int neuron_numbers) {
     int n = find_n(network);
 
@@ -91,6 +105,9 @@ void set_weights(regularization_params *params, enum weight_init weight_name) {
             break;
         case HE_WEIGHT_INITIALIZATION:
             params->weight_initializ = he_weight_initialization;
+            break;
+        case NULL_WEIGHT_INITIALIZATION:
+            params->weight_initializ = null_weight_initialization;
             break;
     }
 }
