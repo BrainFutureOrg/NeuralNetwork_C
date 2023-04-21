@@ -62,7 +62,7 @@ void add_after_start_layer(network_start_layer *network, int neuron_numbers,
 
     matrix bias = matrix_creation(neuron_numbers, 1);
     for (int i = 0; i < bias.i; i++) {
-        bias.table[i][0] = randn();
+        bias.table[i][0] = 0;
     }
 
     new_layer->weights = regularization.weight_initializ(network, neuron_numbers);
