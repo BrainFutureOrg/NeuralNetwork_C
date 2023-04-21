@@ -14,6 +14,7 @@ regularization_params init_regularization_params() {
     regularization_params result;
     result.l1 = zero_placeholder;
     result.l2 = zero_placeholder;
+    return result;
 }
 
 general_regularization_params init_general_regularization_params() {
