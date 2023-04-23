@@ -21,7 +21,7 @@ struct regularization_params {
 };
 
 struct general_regularization_params {
-    int batch_size;
+    //int batch_size;
 
     matrix (*nablaC)(matrix, matrix);
 
@@ -30,7 +30,7 @@ struct general_regularization_params {
 
 struct network_start_layer {
     int i;
-
+    general_regularization_params general_regularization;
     struct neural_network *next_layer;
 };
 

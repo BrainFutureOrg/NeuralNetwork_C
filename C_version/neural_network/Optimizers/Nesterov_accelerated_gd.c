@@ -59,16 +59,16 @@ void gradient_descent_nesterov_batch(neural_network *layer, matrix *error, int b
 void learn_step_nesterov_batch(network_start_layer network, double learning_rate, matrix *start_layers,
                                matrix *result_layers, int batch_size,
                                int epoch, general_regularization_params general_regularizations,
-                               matrix *momentum_weights, matrix *momentum_bias, double friction) {
+                               matrix *momentum_weights, matrix *momentum_bias, Nesterov_params params) {
     network_start_layer network_copy = neural_network_copy(network);
 
     neural_network *current = last_layer(network);
     int network_layer_number = count_hidden_layers(network);
     neural_network *current_copy = network_copy.next_layer;
     for (int i = 0; i < network_layer_number; i++) {
-        matrix_multiply_by_constant(momentum_weights[i], friction);
+        matrix_multiply_by_constant(momentum_weights[i], params.friction);
         matrix_addition_inplace(current_copy->weights, momentum_weights[i]);
-        matrix_multiply_by_constant(momentum_bias[i], friction);
+        matrix_multiply_by_constant(momentum_bias[i], params.friction);
         matrix_addition_inplace(current_copy->bias, momentum_bias[i]);
         current_copy = current_copy->next_layer;
     }
@@ -120,7 +120,7 @@ void learn_step_nesterov_batch(network_start_layer network, double learning_rate
 void learn_step_nesterov_array_batch(network_start_layer network, double learning_rate, matrix *start_layer,
                                      matrix *result_layer, int sample_number,
                                      general_regularization_params general_regularization,
-                                     int epoch, double friction) {
+                                     int epoch, Nesterov_params params) {
     int n = count_hidden_layers(network);
     matrix *momentum_weights = calloc(n, sizeof(matrix));
     matrix *momentum_bias = calloc(n, sizeof(matrix));
@@ -146,7 +146,7 @@ void learn_step_nesterov_array_batch(network_start_layer network, double learnin
         }
         learn_step_nesterov_batch(network, learning_rate, start_layers, result_layers,
                                   general_regularization.batch_size, epoch, general_regularization, momentum_weights,
-                                  momentum_bias, friction);
+                                  momentum_bias, params);
         free(start_layers);
         free(result_layers);
     }
@@ -160,7 +160,7 @@ void learn_step_nesterov_array_batch(network_start_layer network, double learnin
     }
     learn_step_nesterov_batch(network, learning_rate, start_layers, result_layers,
                               sample_number % general_regularization.batch_size, epoch, general_regularization,
-                              momentum_weights, momentum_bias, friction);
+                              momentum_weights, momentum_bias, params);
     free(start_layers);
     free(result_layers);
     for (int i = 0; i < n; i++) {
@@ -174,7 +174,7 @@ void learn_step_nesterov_array_batch(network_start_layer network, double learnin
 void learn_step_nesterov_paired_array_batch(network_start_layer network, double learning_rate,
                                             matrix **start_result_layer, int sample_number,
                                             general_regularization_params general_regularization,
-                                            int epoch, double friction) {
+                                            int epoch, Nesterov_params params) {
     learn_step_nesterov_array_batch(network, learning_rate, start_result_layer[0], start_result_layer[1],
-                                    sample_number, general_regularization, epoch, friction);
+                                    sample_number, general_regularization, epoch, params);
 }

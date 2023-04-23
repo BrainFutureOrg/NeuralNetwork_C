@@ -6,6 +6,7 @@
 #ifndef C_VERSION_SGD_H
 #define C_VERSION_SGD_H
 
+
 void learn_step_optimizerless_array_batch(network_start_layer network, double learning_rate, matrix *start_layer,
                                           matrix *result_layer, int sample_number,
                                           general_regularization_params general_regularization,

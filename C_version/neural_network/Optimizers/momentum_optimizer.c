@@ -9,14 +9,15 @@
 
 void gradient_descent_momentum_batch(neural_network *layer, matrix *error, int batch_size, double learning_rate,
                                      matrix **previous_values, int number_of_current_layer, int epoch,
-                                     matrix momentum_weights, matrix momentum_bias, double friction) {
+                                     matrix momentum_weights, matrix momentum_bias, momentum_params params) {
+
     matrix new_weights = matrix_copy(layer->weights);
     matrix new_bias = matrix_copy(layer->bias);
     for (int i = 0; i < batch_size; i++) {
         matrix multiplied = matrix_copy(error[i]);
         matrix_multiply_by_constant(multiplied, learning_rate);
         //matrix_subtract_inplace(new_bias, multiplied);
-        matrix_multiply_by_constant(momentum_bias, friction);
+        matrix_multiply_by_constant(momentum_bias, params.friction);
         matrix_subtract_inplace(momentum_bias, multiplied);
         matrix_addition_inplace(new_bias, momentum_bias);
 
@@ -31,7 +32,7 @@ void gradient_descent_momentum_batch(neural_network *layer, matrix *error, int b
         matrix_free(transpozed);
         matrix_multiply_by_constant(multiplied, learning_rate);
         //matrix_subtract_inplace(new_weights, multiplied);
-        matrix_multiply_by_constant(momentum_weights, friction);
+        matrix_multiply_by_constant(momentum_weights, params.friction);
         matrix_subtract_inplace(momentum_weights, multiplied);
         matrix_addition_inplace(new_weights, momentum_weights);
         matrix_free(multiplied);
@@ -59,7 +60,7 @@ void gradient_descent_momentum_batch(neural_network *layer, matrix *error, int b
 void learn_step_momentum_batch(network_start_layer network, double learning_rate, matrix *start_layers,
                                matrix *result_layers, int batch_size,
                                int epoch, general_regularization_params general_regularizations,
-                               matrix *momentum_weights, matrix *momentum_bias, double friction) {
+                               matrix *momentum_weights, matrix *momentum_bias, momentum_params params) {
     matrix **prediction = predict_all_layers_batch(network, start_layers, batch_size);
     neural_network *current = last_layer(network);
     int network_layer_number = count_hidden_layers(network);
@@ -82,7 +83,7 @@ void learn_step_momentum_batch(network_start_layer network, double learning_rate
     for (int i = network_layer_number - 1; i >= 0; i--) {
         gradient_descent_momentum_batch(current, dl, batch_size, learning_rate, prediction, i, epoch,
                                         momentum_weights[i],
-                                        momentum_bias[i], friction);
+                                        momentum_bias[i], params);
         matrix transposed = matrix_transposition(current->weights);
         current = current->previous_layer;
         for (int j = 0; j < batch_size; j++) {
@@ -107,7 +108,7 @@ void learn_step_momentum_batch(network_start_layer network, double learning_rate
 void learn_step_momentum_array_batch(network_start_layer network, double learning_rate, matrix *start_layer,
                                      matrix *result_layer, int sample_number,
                                      general_regularization_params general_regularization,
-                                     int epoch, double friction) {
+                                     int epoch, momentum_params params) {
     int n = count_hidden_layers(network);
     matrix *momentum_weights = calloc(n, sizeof(matrix));
     matrix *momentum_bias = calloc(n, sizeof(matrix));
@@ -133,7 +134,7 @@ void learn_step_momentum_array_batch(network_start_layer network, double learnin
         }
         learn_step_momentum_batch(network, learning_rate, start_layers, result_layers,
                                   general_regularization.batch_size, epoch, general_regularization, momentum_weights,
-                                  momentum_bias, friction);
+                                  momentum_bias, params);
         free(start_layers);
         free(result_layers);
     }
@@ -147,7 +148,7 @@ void learn_step_momentum_array_batch(network_start_layer network, double learnin
     }
     learn_step_momentum_batch(network, learning_rate, start_layers, result_layers,
                               sample_number % general_regularization.batch_size, epoch, general_regularization,
-                              momentum_weights, momentum_bias, friction);
+                              momentum_weights, momentum_bias, params);
     free(start_layers);
     free(result_layers);
     for (int i = 0; i < n; i++) {
@@ -161,7 +162,7 @@ void learn_step_momentum_array_batch(network_start_layer network, double learnin
 void learn_step_momentum_paired_array_batch(network_start_layer network, double learning_rate,
                                             matrix **start_result_layer, int sample_number,
                                             general_regularization_params general_regularization,
-                                            int epoch, double friction) {
+                                            int epoch, momentum_params params) {
     learn_step_momentum_array_batch(network, learning_rate, start_result_layer[0], start_result_layer[1],
-                                    sample_number, general_regularization, epoch, friction);
+                                    sample_number, general_regularization, epoch, params);
 }
