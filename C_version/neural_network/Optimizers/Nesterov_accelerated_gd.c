@@ -6,6 +6,8 @@
 #include "../neural_network.h"
 #include "optimizers_functions.h"
 #include <stdlib.h>
+#include "../../terminal_output/progres_bar.h"
+//TODO uncomment
 
 void gradient_descent_nesterov_batch(neural_network *layer, matrix *error, int batch_size, double learning_rate,
                                      matrix **previous_values, int number_of_current_layer, int epoch,

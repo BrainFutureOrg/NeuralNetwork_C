@@ -6,7 +6,8 @@
 #include "../neural_network.h"
 #include "optimizers_functions.h"
 #include <stdlib.h>
-
+//TODO розкоментувати
+/*
 void gradient_descent_momentum_batch(neural_network *layer, matrix *error, int batch_size, double learning_rate,
                                      matrix **previous_values, int number_of_current_layer, int epoch,
                                      matrix momentum_weights, matrix momentum_bias, momentum_params params) {
@@ -166,3 +167,4 @@ void learn_step_momentum_paired_array_batch(network_start_layer network, double 
     learn_step_momentum_array_batch(network, learning_rate, start_result_layer[0], start_result_layer[1],
                                     sample_number, general_regularization, epoch, params);
 }
+*/

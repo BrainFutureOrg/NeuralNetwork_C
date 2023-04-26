@@ -13,4 +13,6 @@ void check_learning();
 
 void check_DAO();
 
+void check_DAO_reader();
+
 #endif //C_VERSION_MAIN_TESTS_H

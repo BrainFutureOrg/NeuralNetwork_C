@@ -32,6 +32,31 @@ void check_DAO() {
 
 }
 
+void null_func(matrix m) {}
+
+void check_DAO_reader() {
+    data_reader reader = create_data_reader("mnist_train.csv", 1, 1, 21, null_func);
+
+    for (int o = 0; o < 3; ++o) {
+        batch *start_result_layer = read_batch_from_data_nn(&reader);
+        for (int i = 0; i < 28; ++i) {
+            for (int j = 0; j < 28; ++j) {
+                printf("%3.0lf ", start_result_layer[0].batch_elements->table[i * 28 + j][0]);
+            }
+            printf("\n");
+
+        }
+//    matrix_(start_result_layer[0].batch_elements[0]);
+        matrix_print(start_result_layer[1].batch_elements[0]);
+
+        batch_free(start_result_layer[0]);
+        batch_free(start_result_layer[1]);
+        free(start_result_layer);
+        data_reader_rollback(&reader);
+    }
+    close_data_reader(reader);
+}
+
 void check_matrix_print() {
 
     double matrix1[3][2] = {{1, 2},

@@ -19,7 +19,7 @@ regularization_params init_regularization_params() {
 
 general_regularization_params init_general_regularization_params() {
     general_regularization_params result;
-    result.batch_size = 1;
+//    result.batch_size = 1;
     return result;
 }
 

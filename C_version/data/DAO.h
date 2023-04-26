@@ -7,9 +7,12 @@
 
 #include <stdio.h>
 #include "../math/matrix_operations.h"
+#include "../math/batch_operations.h"
 
 typedef struct data_reader {
     FILE *fp;
+    int from_line;
+    char *file_name;
 
     void (*data_prepare)(matrix);
 
@@ -21,7 +24,9 @@ typedef struct data_reader {
 data_reader
 create_data_reader(char *file_name, int from_line, int sample_number, int batch_size, void (*data_prepare)(matrix));
 
-matrix **read_batch_from_data_nn(data_reader *reader);
+void data_reader_rollback(data_reader *reader);
+
+batch *read_batch_from_data_nn(data_reader *reader);
 
 void close_data_reader(data_reader reader);
 

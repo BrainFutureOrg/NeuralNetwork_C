@@ -10,13 +10,17 @@
 #include <math.h>
 #include <stdio.h>
 #include <errno.h>
+#include "../../data/DAO.h"
+#include "../../math/batch_operations.h"
 
 #define EPSILON 0.000000001
 
 void gradient_descent_adam_batch(neural_network *layer, matrix *error, int batch_size, double learning_rate,
                                  matrix **previous_values, int number_of_current_layer, int epoch,
                                  matrix momentum_weights, matrix momentum_bias, matrix s_weights, matrix s_bias,
-                                 double b1, double b2) {
+                                 Adam_params params) {
+    double b1 = params.b1;
+    double b2 = params.b2;
     matrix new_weights = matrix_copy(layer->weights);
     matrix new_bias = matrix_copy(layer->bias);
 
@@ -119,20 +123,20 @@ void gradient_descent_adam_batch(neural_network *layer, matrix *error, int batch
     matrix_free(l2_mtrx);
 }
 
-void learn_step_adam_batch(network_start_layer network, double learning_rate, matrix *start_layers,
-                           matrix *result_layers, int batch_size,
-                           int epoch, general_regularization_params general_regularizations,
+void learn_step_adam_batch(network_start_layer network, double learning_rate,
+                           int epoch, batch *start_result_layers, general_regularization_params general_regularizations,
                            matrix *momentum_weights, matrix *momentum_bias, matrix *s_weights, matrix *s_bias,
-                           double b1, double b2) {
-    matrix **prediction = predict_all_layers_batch(network, start_layers, batch_size);
+                           Adam_params params) {
+    matrix **prediction = predict_all_layers_batch(network, start_result_layers[0].batch_elements,
+                                                   start_result_layers[0].size);
     neural_network *current = last_layer(network);
     int network_layer_number = count_hidden_layers(network);
-    matrix *dl = calloc(batch_size, sizeof(matrix));
-    for (int i = 0; i < batch_size; i++) {
+    matrix *dl = calloc(start_result_layers[0].size, sizeof(matrix));
+    for (int i = 0; i < start_result_layers[0].size; i++) {
         matrix derived_results = matrix_copy_activated(prediction[i][network_layer_number],
                                                        current->activation_function);
         //matrix nablaC = matrix_substact(derived_results, result_layers[i]);//TODO cross entropy
-        matrix nablaC = general_regularizations.nablaC(derived_results, result_layers[i]);
+        matrix nablaC = general_regularizations.nablaC(derived_results, start_result_layers[1].batch_elements[i]);
         matrix_free(derived_results);
         derived_results = matrix_copy_activated(prediction[i][network_layer_number],
                                                 current->activation_function_derivative);
@@ -142,12 +146,12 @@ void learn_step_adam_batch(network_start_layer network, double learning_rate, ma
         matrix_free(derived_results);
     }
     for (int i = network_layer_number - 1; i >= 0; i--) {
-        gradient_descent_adam_batch(current, dl, batch_size, learning_rate, prediction, i, epoch,
+        gradient_descent_adam_batch(current, dl, start_result_layers[0].size, learning_rate, prediction, i, epoch,
                                     momentum_weights[i],
-                                    momentum_bias[i], s_weights[i], s_bias[i], b1, b2);
+                                    momentum_bias[i], s_weights[i], s_bias[i], params);
         matrix transposed = matrix_transposition(current->weights);
         current = current->previous_layer;
-        for (int j = 0; j < batch_size; j++) {
+        for (int j = 0; j < start_result_layers[0].size; j++) {
             matrix multiplied = matrix_multiplication(transposed, dl[j]);
             matrix derived_results = matrix_copy(prediction[j][i]);
             if (current != NULL) {
@@ -160,16 +164,16 @@ void learn_step_adam_batch(network_start_layer network, double learning_rate, ma
         }
         matrix_free(transposed);
     }
-    matrix_free_arrayed(dl, batch_size);
-    for (int i = 0; i < batch_size; i++)
+    matrix_free_arrayed(dl, start_result_layers[0].size);
+    for (int i = 0; i < start_result_layers[0].size; i++)
         matrix_free_arrayed(prediction[i], network_layer_number + 1);
     free(prediction);
 }
 
-void learn_step_adam_array_batch(network_start_layer network, double learning_rate, matrix *start_layer,
-                                 matrix *result_layer, int sample_number,
-                                 general_regularization_params general_regularization,
-                                 int epoch, double b1, double b2) {
+void
+learn_step_adam_reader_batch(network_start_layer network, double learning_rate, data_reader *reader,
+                             general_regularization_params general_regularization,
+                             int epoch, Adam_params params) {
     int n = count_hidden_layers(network);
     matrix *momentum_weights = calloc(n, sizeof(matrix));
     matrix *momentum_bias = calloc(n, sizeof(matrix));
@@ -192,40 +196,45 @@ void learn_step_adam_array_batch(network_start_layer network, double learning_ra
 //        if (current_layer->previous_layer != NULL)
         current_layer = current_layer->next_layer;
     }
-    int iter_number = sample_number / general_regularization.batch_size;
+    int iter_number =
+            reader->sample_number / reader->batch_size + (reader->sample_number % reader->batch_size == 0 ? 0 : 1);
     progress_bar bar = create_bar(iter_number);
 
     for (int i = 0; i < iter_number; i++) {
-        matrix *start_layers = calloc(general_regularization.batch_size, sizeof(matrix));
-        matrix *result_layers = calloc(general_regularization.batch_size, sizeof(matrix));
-        for (int j = 0; j < general_regularization.batch_size; j++) {
-            start_layers[j] = start_layer[i * general_regularization.batch_size + j];
-            result_layers[j] = result_layer[i * general_regularization.batch_size + j];
-        }
-        learn_step_adam_batch(network, learning_rate, start_layers, result_layers,
-                              general_regularization.batch_size, epoch, general_regularization, momentum_weights,
-                              momentum_bias, s_weights, s_bias, b1, b2);
+        batch *batch_pair = read_batch_from_data_nn(reader);
+        learn_step_adam_batch(network, learning_rate,
+                              epoch, batch_pair, general_regularization, momentum_weights,
+                              momentum_bias, s_weights, s_bias, params);
         bar_step(&bar);
-        free(start_layers);
-        free(result_layers);
+        //free(start_layers);
+        //free(result_layers);
+        batch_free(batch_pair[0]);
+        batch_free(batch_pair[1]);
+        free(batch_pair);
     }
-    matrix *start_layers = calloc(sample_number % general_regularization.batch_size, sizeof(matrix));
-    matrix *result_layers = calloc(sample_number % general_regularization.batch_size, sizeof(matrix));
-    for (int j = 0; j < sample_number % general_regularization.batch_size; j++) {
+    data_reader_rollback(reader);
+    //matrix *start_layers = calloc(sample_number % general_regularization.batch_size, sizeof(matrix));
+    //matrix *result_layers = calloc(sample_number % general_regularization.batch_size, sizeof(matrix));
+    //batch *batch_pair = read_batch_from_data_nn(reader);
+    /*for (int j = 0; j < sample_number % general_regularization.batch_size; j++) {
         start_layers[j] = start_layer[
                 (sample_number / general_regularization.batch_size) * general_regularization.batch_size + j];
         result_layers[j] = result_layer[
                 (sample_number / general_regularization.batch_size) * general_regularization.batch_size + j];
-    }
-    learn_step_adam_batch(network, learning_rate, start_layers, result_layers,
-                          sample_number % general_regularization.batch_size, epoch, general_regularization,
-                          momentum_weights, momentum_bias, s_weights, s_bias, b1, b2);
+    }*/
+    //learn_step_adam_batch(network, learning_rate, epoch, batch_pair, general_regularization,
+    //                      momentum_weights, momentum_bias, s_weights, s_bias, params);
     delete_bar(&bar);
-    free(start_layers);
-    free(result_layers);
+    //free(start_layers);
+    //free(result_layers);
+    //batch_free(batch_pair[0]);
+    //batch_free(batch_pair[1]);
+    //free(batch_pair);
     for (int i = 0; i < n; i++) {
         matrix_free(momentum_weights[i]);
         matrix_free(momentum_bias[i]);
+        matrix_free(s_bias[i]);
+        matrix_free(s_weights[i]);
     }
     free(momentum_weights);
     free(momentum_bias);
@@ -233,10 +242,9 @@ void learn_step_adam_array_batch(network_start_layer network, double learning_ra
     free(s_bias);
 }
 
-void learn_step_adam_paired_array_batch(network_start_layer network, double learning_rate,
-                                        matrix **start_result_layer, int sample_number,
-                                        general_regularization_params general_regularization,
-                                        int epoch, double b1, double b2) {
+/*void learn_step_adam_paired_array_batch(network_start_layer network, double learning_rate,
+                                        data_reader reader,
+                                        int epoch, Adam_params params) {
     learn_step_adam_array_batch(network, learning_rate, start_result_layer[0], start_result_layer[1],
-                                sample_number, general_regularization, epoch, b1, b2);
-}
+                                sample_number, general_regularization, epoch, params);
+}*/

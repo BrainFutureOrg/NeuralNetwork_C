@@ -165,32 +165,54 @@ double small_accuracy(network_start_layer network, matrix start_layer, matrix an
     return coordinates_equals(max_answ, max_pred);
 }
 
-double accuracy(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_accuracy) {
+double accuracy(network_start_layer network, batch start_layers, batch answers) {
     double accuracy = 0;
-    for (int i = 0; i < len_of_accuracy; i++) {
-        accuracy += small_accuracy(network, start_layers[i], answers[i]) / len_of_accuracy;
+    for (int i = 0; i < start_layers.size; i++) {
+        accuracy +=
+                small_accuracy(network, start_layers.batch_elements[i], answers.batch_elements[i]) / start_layers.size;
     }
     return accuracy;
 }
 
-void confusion_matrix(network_start_layer network, matrix *start_layers, matrix *answers, int len_of_data) {
-    int size = answers[0].i;
+matrix confusion_matrix(network_start_layer network, batch start_layers, batch answers) {
+    int size = answers.batch_elements[0].i;
     matrix confusion = matrix_creation(size, size);
-    printf("predict\\true\n");
-    for (int i = 0; i < len_of_data; i++) {
-        matrix prediction = predict(network, start_layers[i]);
+
+    for (int i = 0; i < start_layers.size; i++) {
+        matrix prediction = predict(network, start_layers.batch_elements[i]);
         coordinates max_pred = matrix_argmax(prediction);
-        coordinates max_answ = matrix_argmax(answers[i]);
+        coordinates max_answ = matrix_argmax(answers.batch_elements[i]);
         confusion.table[max_pred.i][max_answ.i] += 1;
         matrix_free(prediction);
 
     }
-    matrix_print_with_indexation(confusion, 4, 0);
-    matrix_free(confusion);
+    return confusion;
 }
 
-void confusion_matrix_paired(network_start_layer network, matrix **start_result_layers, int len_of_data) {
-    confusion_matrix(network, start_result_layers[0], start_result_layers[1], len_of_data);
+void confusion_matrix_paired(network_start_layer network, data_reader *reader) {
+    int iter_number =
+            reader->sample_number / reader->batch_size + (reader->sample_number % reader->batch_size == 0 ? 0 : 1);
+
+    matrix confusion;
+    int created = 0;
+    for (int i = 0; i < iter_number; ++i) {
+        batch *start_result_layers = read_batch_from_data_nn(reader);
+        matrix results = confusion_matrix(network, start_result_layers[0], start_result_layers[1]);
+        if (created) {
+            matrix_addition_inplace(confusion, results);
+            matrix_free(results);
+        } else {
+            created = 1;
+            confusion = results;
+        }
+        batch_free(start_result_layers[0]);
+        batch_free(start_result_layers[1]);
+        free(start_result_layers);
+    }
+    data_reader_rollback(reader);
+    printf("predict\\true\n");
+    matrix_print_with_indexation(confusion, 4, 0);
+    matrix_free(confusion);
 }
 
 void free_network(network_start_layer network) {
@@ -226,28 +248,48 @@ double mse_loss(network_start_layer network, matrix *start_layers, int sample_nu
     return sum / sample_number;
 }
 
-double many_loss(network_start_layer network, matrix *start_layers, int sample_number, matrix *expected_results,
+double many_loss(network_start_layer network, batch start_layers, batch expected_results,
                  general_regularization_params general_regularization) {
     double sum = 0;
-    for (int i = 0; i < sample_number; i++) {
-        matrix real_results = predict(network, start_layers[i]);
-        sum += general_regularization.cost_function(real_results, expected_results[i]) / sample_number;
+    for (int i = 0; i < start_layers.size; i++) {
+        matrix real_results = predict(network, start_layers.batch_elements[i]);
+        sum += general_regularization.cost_function(real_results, expected_results.batch_elements[i]) /
+               start_layers.size;
         matrix_free(real_results);
     }
     return sum;
 }
 
-void test_network(network_start_layer network, matrix *start_layers, int start_layer_number, matrix *expected_results,
-                  general_regularization_params general_regularization) {
-    double accuracy_num = accuracy(network, start_layers, expected_results, start_layer_number);
+double *test_network(network_start_layer network, batch start_layers, batch expected_results,
+                     general_regularization_params general_regularization) {
+    double accuracy_num = accuracy(network, start_layers, expected_results);
     //double loss_num = mse_loss(network, start_layers, start_layer_number, expected_results);
-    double loss_num = many_loss(network, start_layers, start_layer_number, expected_results, general_regularization);
-    printf("accuracy: %f, loss: %f\n", accuracy_num, loss_num);
+    double loss_num = many_loss(network, start_layers, expected_results, general_regularization);
+//    printf("accuracy: %f, loss: %f\n", accuracy_num, loss_num);
+    double *results = calloc(2, sizeof(double));
+    results[0] = accuracy_num;
+    results[1] = loss_num;
+    return results;
 }
 
-void test_network_paired(network_start_layer network, matrix **start_result_layers, int sample_number,
+void test_network_paired(network_start_layer network, data_reader *reader,
                          general_regularization_params general_regularization) {
-    test_network(network, start_result_layers[0], sample_number, start_result_layers[1], general_regularization);
+    int iter_number =
+            reader->sample_number / reader->batch_size + (reader->sample_number % reader->batch_size == 0 ? 0 : 1);
+    double accuracy_num = 0;
+    double loss_num = 0;
+    for (int i = 0; i < iter_number; ++i) {
+        batch *start_result_layers = read_batch_from_data_nn(reader);
+        double *results = test_network(network, start_result_layers[0], start_result_layers[1], general_regularization);
+        accuracy_num += results[0] * start_result_layers[0].size / reader->sample_number;
+        loss_num += results[1] * start_result_layers[0].size / reader->sample_number;
+        free(results);
+        batch_free(start_result_layers[0]);
+        batch_free(start_result_layers[1]);
+        free(start_result_layers);
+    }
+    data_reader_rollback(reader);
+    printf("accuracy: %f, loss: %f\n", accuracy_num, loss_num);
 }
 
 neural_network *copy_neural_network_layer(neural_network *layer) {
