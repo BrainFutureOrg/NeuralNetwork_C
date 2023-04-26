@@ -237,7 +237,7 @@ void try_train_nesterov() {
     confusion_matrix_paired(MNIST_network, test_full_data, test_number);
     free_data(test_full_data, test_number);
     free_network(MNIST_network);
-}
+}*/
 
 void try_train_adam() {
 
