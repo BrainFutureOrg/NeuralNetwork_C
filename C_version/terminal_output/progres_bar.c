@@ -8,7 +8,7 @@
 #define bar_len 50
 
 progress_bar create_bar(int number_of_all_elements) {
-    return (progress_bar) {bar_len, number_of_all_elements, 0};
+    return (progress_bar) {time(NULL), bar_len, number_of_all_elements, 0};
 }
 
 void print_char_n_times(char c, int n) {
@@ -30,6 +30,15 @@ void bar_step(progress_bar *bar) {
         print_char_n_times(' ', bar->bar_length - 1 - equ_num);
     }
     putchar(']');
+
+    int time_spent = (int) (time(NULL) - bar->start_time);
+    int min = time_spent / 60;
+    int sec = time_spent % 60;
+    printf(" time spent: %d:%d  ", min, sec);
+    int maybe_time = time_spent * (bar->number_of_all_elements - bar->this_number) / bar->this_number;
+    min = maybe_time / 60;
+    sec = maybe_time % 60;
+    printf("will be: %d:%d", min, sec);
     printf("\n\033[1A");
 //    putchar('\r');
 
@@ -41,4 +50,9 @@ void delete_bar(progress_bar *bar) {
     }
     putchar('\n');
     printf("\033[1A");
+
+    int time_spent = (int) (time(NULL) - bar->start_time);
+    int min = time_spent / 60;
+    int sec = time_spent % 60;
+    printf("Learning lasted %d:%d\n", min, sec);
 }

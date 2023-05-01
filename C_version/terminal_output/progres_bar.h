@@ -8,6 +8,7 @@
 #include <time.h>
 
 typedef struct progress_bar {
+    time_t start_time;
     int bar_length;
     int number_of_all_elements;
     int this_number;
