@@ -1,6 +1,7 @@
 //
 // Created by maximus on 10.04.23.
 //
+#include "../neural_network/neural_structs.h"
 
 #ifndef C_VERSION_MAIN_TESTS_H
 #define C_VERSION_MAIN_TESTS_H

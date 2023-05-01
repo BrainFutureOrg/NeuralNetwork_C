@@ -93,7 +93,7 @@ int main() {
 
 
 double func_for_matrix(double num) {
-    return num + 0.05;
+    return num - 0.05;
 }
 
 
@@ -109,13 +109,13 @@ void train_network() {
     int validation_numbers = 10000;
     int test_number = 10000;
 
-    int epoch = 3;
-    int epoch2 = 7;
+    int epoch = 5;
+    int epoch2 = 0;
     int batch_size = 32;
     double b1 = 0.9;
     double b2 = 0.95;
 
-    Adam_params adam_params;
+    Adam_future_params adam_params;
     adam_params.b1 = b1;
     adam_params.b2 = b2;
 

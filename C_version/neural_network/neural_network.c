@@ -16,6 +16,7 @@
 #define EPSILON 0.00005
 
 void add_function_with_derivative(neural_network *network_layer, activation_function_names activation_function_name) {
+    network_layer->activation_name = activation_function_name;
     if (activation_function_name == Sigmoid) {
         network_layer->activation_function = network_sigmoid;
         network_layer->activation_function_derivative = network_sigmoid_derivative;
@@ -125,6 +126,19 @@ void print_network(network_start_layer network) {
         printf("layer %d exists\n", i);
         current = current->next_layer;
     }
+}
+
+matrix predict_average(network_start_layer *networks, int network_number, matrix start_layer) {
+    matrix *results = calloc(network_number, sizeof(matrix));
+    for (int i = 0; i < network_number; i++) {
+        results[i] = predict(networks[i], start_layer);
+    }
+    matrix result = matrix_average(network_number, results);
+    for (int i = 0; i < network_number; i++) {
+        matrix_free(results[i]);
+    }
+    free(results);
+    return result;
 }
 
 matrix predict(network_start_layer network, matrix start_layer) {

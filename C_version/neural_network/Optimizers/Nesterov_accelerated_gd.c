@@ -76,7 +76,7 @@ void learn_step_nesterov_batch(network_start_layer network, double learning_rate
 
     matrix **prediction = predict_all_layers_batch(network_copy, start_result_layers[0].batch_elements,
                                                    start_result_layers[0].size);
-    current_copy = network_copy.next_layer;
+    //current_copy = network_copy.next_layer;//?
     free_network(network_copy);
 
     matrix *dl = calloc(start_result_layers[0].size, sizeof(matrix));

@@ -13,10 +13,14 @@
 
 network_start_layer create_network(int neuron_numbers);
 
+void add_function_with_derivative(neural_network *network_layer, activation_function_names activation_function_name);
+
 void add_layer(network_start_layer *network, int neuron_numbers, activation_function_names activation_function_name,
                regularization_params regularization);
 
 //void learn_step(network_start_layer network, double learning_rate, matrix start_layer, matrix result_layer);
+
+matrix predict_average(network_start_layer *networks, int network_number, matrix start_layer);
 
 matrix predict(network_start_layer network, matrix start_layer);
 
