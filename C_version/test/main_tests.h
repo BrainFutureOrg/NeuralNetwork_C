@@ -15,4 +15,10 @@ void check_DAO();
 
 void check_DAO_reader();
 
+void check_matrix_save();
+
+void read_save_test();
+
+network_start_layer initialise_network();
+
 #endif //C_VERSION_MAIN_TESTS_H

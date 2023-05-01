@@ -9,9 +9,13 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <time.h>
+#include "../data/bin_writers.h"
 //#include <math.h>
 #include "../neural_network/neural_network.h"
 #include "../data/DAO.h"
+#include "../neural_network/weight_initialize/weight_initializers.h"
+#include "../neural_network/regularization/regularization_params.h"
+#include "../data/save_nn.h"
 
 void check_DAO() {
     readline("mnist_train.csv");
@@ -74,6 +78,26 @@ void check_matrix_print() {
     matrix_free(checkingT);
 }
 
+void check_matrix_save() {
+    double matrix1[3][2] = {{1, 2},
+                            {3, 4},
+                            {5, 6}};
+    int size1 = sizeof(matrix1) / sizeof(matrix1[0]);
+    int size2 = sizeof(matrix1[0]) / sizeof(matrix1[0][0]);
+    matrix checking;
+//    checking = make_matrix_from_array(&matrix1[0][0], size1, size2);
+
+    FILE *fp = fopen("matrix_test.bin", "rb");
+//    FILE *fp = fopen("matrix_test.bin", "wb");
+
+//    save_matrix(fp, checking);
+    checking = read_matrix(fp);
+
+    fclose(fp);
+    matrix_print(checking);
+    matrix_free(checking);
+}
+
 void check_matrix_multiplication() {
     double m[2][3] = {{1, 2, 5},
                       {3, 4, 6}};
@@ -103,6 +127,70 @@ void check_matrix_multiplication() {
     }
     matrix_free(matr);
     matrix_free(checking);
+}
+
+network_start_layer initialise_network_test() {
+    network_start_layer network = create_network(28 * 28);
+    regularization_params regularization;
+//    regularization.l1 = l1l2;
+//    regularization.l2 = l1l2;
+    set_weights(&regularization, XAVIER_NORMALIZED);
+
+    add_layer(&network, 150, Sigmoid, regularization);
+    add_layer(&network, 10, Sigmoid, regularization);
+    return network;
+}
+
+double func_for_matrix_test(double num) {
+    return num + 0.05;
+}
+
+void data_prepear_test(matrix data) {
+    matrix_multiply_by_constant(data, 1. / 256);
+    matrix_function_to_elements(data, func_for_matrix_test);
+}
+
+#define NN_FILE "network_test.bin"
+
+void save_network() {
+    network_start_layer MNIST_network = initialise_network_test();
+
+
+    int test_number = 10000;
+    general_regularization_params gereral_regularization;
+    paste_cost(&gereral_regularization, cross_entropy);
+    int batch_size = 32;
+    data_reader test_reader = create_data_reader("mnist_test.csv", 0, test_number,
+                                                 batch_size, data_prepear_test);
+    test_network_paired(MNIST_network, &test_reader, gereral_regularization);
+    close_data_reader(test_reader);
+
+
+    save_neural_network(NN_FILE, MNIST_network);
+    free_network(MNIST_network);
+}
+
+void read_network() {
+    network_start_layer MNIST_network = read_neural_network(NN_FILE);
+
+
+    int test_number = 10000;
+    general_regularization_params gereral_regularization;
+    paste_cost(&gereral_regularization, cross_entropy);
+    int batch_size = 32;
+    data_reader test_reader = create_data_reader("mnist_test.csv", 0, test_number,
+                                                 batch_size, data_prepear_test);
+    test_network_paired(MNIST_network, &test_reader, gereral_regularization);
+    close_data_reader(test_reader);
+
+
+    free_network(MNIST_network);
+}
+
+void read_save_test() {
+    save_network();
+    read_network();
+    printf("succes read_save_test");
 }
 
 /*

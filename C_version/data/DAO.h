@@ -38,4 +38,6 @@ FILE *open_file(char *file_name);
 
 void pass_line(FILE *file);
 
+char check_end(FILE *fp);
+
 #endif //C_VERSION_DAO_H

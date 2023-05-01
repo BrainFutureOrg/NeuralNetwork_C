@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "matrix_operations.h"
 #include <math.h>
+#include <stdarg.h>
 #include "../data/my_print.h"
 
 
@@ -295,4 +296,13 @@ coordinates matrix_argmax(matrix matrix_for_operation) {
 
 char coordinates_equals(coordinates coordinates1, coordinates coordinates2) {
     return coordinates1.i == coordinates2.i && coordinates1.j == coordinates2.j ? 1 : 0;
+}
+
+matrix matrix_average(int num, matrix *matrixes_for_operation) {
+    matrix result = matrix_creation(matrixes_for_operation[0].i, matrixes_for_operation[0].j);
+    for (int i = 0; i < num; i++) {
+        matrix_addition_inplace(result, matrixes_for_operation[i]);
+    }
+    matrix_multiply_by_constant(result, 1. / num);
+    return result;
 }

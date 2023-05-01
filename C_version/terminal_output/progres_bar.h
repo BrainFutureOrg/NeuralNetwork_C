@@ -4,6 +4,9 @@
 
 #ifndef C_VERSION_PROGRES_BAR_H
 #define C_VERSION_PROGRES_BAR_H
+
+#include <time.h>
+
 typedef struct progress_bar {
     int bar_length;
     int number_of_all_elements;

@@ -10,13 +10,6 @@
 #include "../math/batch_operations.h"
 #include "../data/DAO.h"
 
-typedef enum {
-    ReLu,
-    Softmax,
-    Sigmoid,
-    Tangential
-} activation_function_names;
-
 
 network_start_layer create_network(int neuron_numbers);
 

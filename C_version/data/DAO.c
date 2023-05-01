@@ -7,8 +7,12 @@
 #include "DAO.h"
 #include <errno.h>
 #include <string.h>
-#include "../neural_network/neural_structs.h"
-#include "../math/batch_operations.h"
+
+char check_end(FILE *fp) {
+    char c = (char) getc(fp);
+    fseek(fp, -1, SEEK_CUR);
+    return EOF == c;
+}
 
 void readline(char *file_name) {
     FILE *file_csv = fopen(file_name, "r");

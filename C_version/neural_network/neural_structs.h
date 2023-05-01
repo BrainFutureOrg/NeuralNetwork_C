@@ -12,6 +12,13 @@ typedef struct regularization_params regularization_params;
 typedef struct general_regularization_params general_regularization_params;
 typedef struct neural_network neural_network;
 
+typedef enum {
+    ReLu,
+    Softmax,
+    Sigmoid,
+    Tangential
+} activation_function_names;
+
 struct regularization_params {
     double (*l1)(int);
 
@@ -40,6 +47,8 @@ struct neural_network {
 
     matrix bias;
 
+    activation_function_names activation_name;
+
     void (*activation_function)(matrix *);
 
     void (*activation_function_derivative)(matrix *);
@@ -50,5 +59,6 @@ struct neural_network {
 
     struct neural_network *previous_layer;
 };
+
 
 #endif //C_VERSION_NEURAL_STRUCTS_H
