@@ -52,17 +52,12 @@ network_start_layer read_neural_network(char *file_name) {
     FILE *fp = fopen(file_name, "rb");
 
     network_start_layer network = read_network_start_layer(fp);
-    printf("YES\n");
     network.next_layer = read_neural_network_structure(fp);
-    printf("YES\n");
     neural_network *network_layer_pointer = network.next_layer;
     while (!check_end(fp)) {
-        printf("YES\n");
         neural_network *new_layer = read_neural_network_structure(fp);
-        printf("YES\n");
         network_layer_pointer->next_layer = new_layer;
         new_layer->previous_layer = network_layer_pointer;
-        printf("YES\n");
         network_layer_pointer = network_layer_pointer->next_layer;
     }
 

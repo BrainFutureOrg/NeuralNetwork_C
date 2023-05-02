@@ -34,11 +34,11 @@ void bar_step(progress_bar *bar) {
     int time_spent = (int) (time(NULL) - bar->start_time);
     int min = time_spent / 60;
     int sec = time_spent % 60;
-    printf(" time spent: %d:%d  ", min, sec);
+    printf(" time spent: %d:%02d  ", min, sec);
     int maybe_time = time_spent * (bar->number_of_all_elements - bar->this_number) / bar->this_number;
     min = maybe_time / 60;
     sec = maybe_time % 60;
-    printf("will be: %d:%d", min, sec);
+    printf("will be: %d:%02d", min, sec);
     printf("\n\033[1A");
 //    putchar('\r');
 
@@ -54,5 +54,5 @@ void delete_bar(progress_bar *bar) {
     int time_spent = (int) (time(NULL) - bar->start_time);
     int min = time_spent / 60;
     int sec = time_spent % 60;
-    printf("Learning lasted %d:%d\n", min, sec);
+    printf("Learning lasted %d:%2d\n", min, sec);
 }
