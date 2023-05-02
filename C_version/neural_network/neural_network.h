@@ -11,6 +11,21 @@
 #include "../data/DAO.h"
 
 
+/*typedef union grid_param {
+    double d;
+    int i;
+} grid_param;*/
+typedef enum grid_param_type {
+    DOUBLE, INT
+} grid_param_type;
+typedef struct grid_param {
+    grid_param_type type;
+    union {
+        double d;
+        int i;
+    };
+} grid_param;
+
 network_start_layer create_network(int neuron_numbers);
 
 void add_function_with_derivative(neural_network *network_layer, activation_function_names activation_function_name);

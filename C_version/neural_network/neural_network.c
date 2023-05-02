@@ -332,3 +332,23 @@ network_start_layer neural_network_copy(network_start_layer network) {
 //    printf("\n");
     return network_copy;
 }
+
+void stochastic_grid_search(double (*method)(grid_param *), grid_param **param_scopes, int param_number, int attempts) {
+    double min_loss;
+    for (int i = 0; i < attempts; i++) {
+        grid_param *params = calloc(param_number, sizeof(grid_param));//TODO free
+        for (int j = 0; j < param_number; j++) {
+            switch (param_scopes[0][j].type) {
+                case INT:
+                    params[j].type = INT;
+                    params[j].i = randint(param_scopes[0][j].i, param_scopes[1][j].i);
+                    break;
+                case DOUBLE:
+                    params[j].type = DOUBLE;
+                    params[j].d = randu_range(param_scopes[0][j].d, param_scopes[1][j].d);
+                    break;
+            }
+        }
+        
+    }
+}
