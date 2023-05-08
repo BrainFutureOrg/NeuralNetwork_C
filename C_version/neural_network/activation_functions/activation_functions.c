@@ -58,14 +58,18 @@ void softmax_stable(matrix *M) {
     }
     for (int i = 0; i < M->i; i++) {
         for (int j = 0; j < M->j; j++) {
-            sum += exp(M->table[i][j] / max);
+            sum += exp(M->table[i][j] - max);
         }
     }
     for (int i = 0; i < M->i; i++) {
         for (int j = 0; j < M->j; j++) {
-            result.table[i][j] = exp(M->table[i][j] / max) / sum;
+            result.table[i][j] = exp(M->table[i][j] - max) / sum;
         }
     }
+    if (errno)
+        printf("4) %d\n", errno);
+
+    matrix_free(*M);
     *M = result;
 }
 

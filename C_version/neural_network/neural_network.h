@@ -71,6 +71,9 @@ double mse_loss(network_start_layer network, matrix *start_layers, int sample_nu
 //double* test_network(network_start_layer network, batch start_layers, batch expected_results,
 //                  general_regularization_params general_regularization);
 
+double *test_network_paired_double(network_start_layer network, data_reader *reader,
+                                   general_regularization_params general_regularization);
+
 void test_network_paired(network_start_layer network, data_reader *reader,
                          general_regularization_params general_regularization);
 
@@ -79,5 +82,9 @@ matrix confusion_matrix(network_start_layer network, batch start_layers, batch a
 void confusion_matrix_paired(network_start_layer network, data_reader *reader);
 
 network_start_layer neural_network_copy(network_start_layer network);
+
+void stochastic_grid_search(char *filename, network_start_layer network,
+                            double (*method_to_minimize)(network_start_layer *network, grid_param *),
+                            grid_param **param_scopes, int param_number, int attempts);
 
 #endif //C_VERSION_NEURAL_NETWORK_H

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
+#include "../data/save_nn.h"
 
 #define EPSILON 0.00005
 
@@ -300,7 +300,11 @@ double *test_network_paired_double(network_start_layer network, data_reader *rea
         free(start_result_layers);
     }
     data_reader_rollback(reader);
-    printf("accuracy: %f, loss: %f\n", accuracy_num, loss_num);
+
+    double *result = calloc(2, sizeof(double));
+    result[0] = accuracy_num;
+    result[1] = loss_num;
+    return result;
 }
 
 void test_network_paired(network_start_layer network, data_reader *reader,
@@ -337,10 +341,32 @@ network_start_layer neural_network_copy(network_start_layer network) {
     return network_copy;
 }
 
-void stochastic_grid_search(double (*method)(grid_param *), grid_param **param_scopes, int param_number, int attempts) {
+/*double loss_for_search(int param_number, grid_param **param_scopes) {
+    grid_param *params = calloc(param_number, sizeof(grid_param));//TODO free
+    for (int j = 0; j < param_number; j++) {
+        switch (param_scopes[0][j].type) {
+            case INT:
+                params[j].type = INT;
+                params[j].i = randint(param_scopes[0][j].i, param_scopes[1][j].i);
+                break;
+            case DOUBLE:
+                params[j].type = DOUBLE;
+                params[j].d = randu_range(param_scopes[0][j].d, param_scopes[1][j].d);
+                break;
+        }
+    }
+}*/
+
+void stochastic_grid_search(char *filename, network_start_layer network,
+                            double (*method_to_minimize)(network_start_layer *network, grid_param *),
+                            grid_param **param_scopes, int param_number, int attempts) {
     double min_loss;
+    char isfirst = 1;
+    grid_param *best_params;
     for (int i = 0; i < attempts; i++) {
-        grid_param *params = calloc(param_number, sizeof(grid_param));//TODO free
+        printf("GRID SEARCH ATTEMPT %d", i);
+        network_start_layer network_copy = neural_network_copy(network);
+        grid_param *params = calloc(param_number, sizeof(grid_param));
         for (int j = 0; j < param_number; j++) {
             switch (param_scopes[0][j].type) {
                 case INT:
@@ -353,6 +379,23 @@ void stochastic_grid_search(double (*method)(grid_param *), grid_param **param_s
                     break;
             }
         }
-        
+        if (isfirst) {
+            isfirst = 0;
+            min_loss = method_to_minimize(&network_copy, params);
+            best_params = params;
+            save_neural_network(filename, network_copy);
+        } else {
+            double current_loss = method_to_minimize(&network_copy, params);
+            if (current_loss < min_loss) {
+                min_loss = current_loss;
+                free(best_params);
+                best_params = params;
+                save_neural_network(filename, network_copy);
+            } else {
+                free(params);
+            }
+        }
+
+        free_network(network_copy);
     }
 }
