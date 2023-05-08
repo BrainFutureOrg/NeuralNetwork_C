@@ -72,7 +72,8 @@ void learn_step_momentum_batch(network_start_layer network, double learning_rate
         matrix derived_results = matrix_copy_activated(prediction[i][network_layer_number],
                                                        current->activation_function);
         //matrix nablaC = matrix_substact(derived_results, result_layers[i]);//TODO cross entropy
-        matrix nablaC = general_regularizations.nablaC(derived_results, start_result_layers[1].batch_elements[i]);
+        matrix nablaC = general_regularizations.nablaC(*current, derived_results,
+                                                       start_result_layers[1].batch_elements[i]);
         matrix_free(derived_results);
 
         derived_results = matrix_copy_activated(prediction[i][network_layer_number],

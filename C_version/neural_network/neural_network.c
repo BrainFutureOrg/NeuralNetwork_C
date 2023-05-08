@@ -4,11 +4,8 @@
 
 #include "neural_network.h"
 #include "activation_functions/network_activation_functions.h"
-#include "../math/matrix_operations.h"
 #include "../math/statistical_random.h"
 #include <stdlib.h>
-#include <math.h>
-#include <limits.h>
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
@@ -286,8 +283,8 @@ double *test_network(network_start_layer network, batch start_layers, batch expe
     return results;
 }
 
-void test_network_paired(network_start_layer network, data_reader *reader,
-                         general_regularization_params general_regularization) {
+double *test_network_paired_double(network_start_layer network, data_reader *reader,
+                                   general_regularization_params general_regularization) {
     int iter_number =
             reader->sample_number / reader->batch_size + (reader->sample_number % reader->batch_size == 0 ? 0 : 1);
     double accuracy_num = 0;
@@ -304,6 +301,13 @@ void test_network_paired(network_start_layer network, data_reader *reader,
     }
     data_reader_rollback(reader);
     printf("accuracy: %f, loss: %f\n", accuracy_num, loss_num);
+}
+
+void test_network_paired(network_start_layer network, data_reader *reader,
+                         general_regularization_params general_regularization) {
+    double *accuracy_loss = test_network_paired_double(network, reader, general_regularization);
+    printf("accuracy: %f, loss: %f\n", accuracy_loss[0], accuracy_loss[1]);
+    free(accuracy_loss);
 }
 
 neural_network *copy_neural_network_layer(neural_network *layer) {

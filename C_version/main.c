@@ -17,6 +17,7 @@
 #include "test/main_tests.h"
 
 #define check_error_void if(errno!=0) return;
+#define check_error_only_print print_error();
 #define check_error_main if(errno!=0) { print_error(); return 0; }
 
 #define ADAM_NETWORK_FILE "adam_network"
@@ -30,13 +31,15 @@ void train_network();
 
 
 double l1l2(int epoch) {
-    if (epoch < 1)
-        return 5e-4;
-    if (epoch < 5)
-        return 1e-4;
-    if (epoch < 7)
-        return 1e-5;
-    return 5e-7;
+//    if (epoch < 1)
+//        return 5e-4;
+//    if (epoch < 5)
+//        return 1e-4;
+//    if (epoch < 7)
+//        return 5e-5;
+//    if (epoch < 9)
+//        return 1e-5;
+    return 0;
 }
 
 double lr(int epoch_number) {
@@ -45,9 +48,9 @@ double lr(int epoch_number) {
     if (epoch_number < 6)
         return 9e-5;
     if (epoch_number < 7)
-        return 5e-6;
-    if (epoch_number < 9)
         return 1e-6;
+    if (epoch_number < 9)
+        return 5e-7;
     return 1e-7;
 }
 
@@ -84,8 +87,8 @@ network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
     regularization_params regularization = init_reg_params();
 
-    add_layer(&network, 150, Sigmoid, regularization);
-    add_layer(&network, 10, Sigmoid, regularization);
+    add_layer(&network, 150, ReLu, regularization);
+    add_layer(&network, 10, Softmax, regularization);
     return network;
 }
 
@@ -107,8 +110,8 @@ void train_saved_network();
 int main() {
     srandom(time(NULL));
 
-//    train_network();
-    train_saved_network();
+    train_network();
+//    train_saved_network();
     check_error_main
     return 0;
 }
@@ -149,7 +152,7 @@ void train_saved_network() {
     for (int p = epoch; p < epoch + epoch2; ++p) {
         printf("EPOCH %d\n", p + 1);
 
-        learn_step_nesterov_reader_batch(MNIST_network, cosine_learning_rate(7e-5, 5e-7, epoch2, p - epoch),
+        learn_step_nesterov_reader_batch(MNIST_network, decay_learning_rate(1e-5, 5e-4, p - epoch),
                                          &train_reader, gereral_regularization, p,
                                          nesterov_params);
         printf("train:      ");
@@ -169,7 +172,7 @@ void train_saved_network() {
 //    confusion_matrix_paired(MNIST_network, &test_reader);
 //    close_data_reader(test_reader);
 //    save_neural_network(NN_FILE, MNIST_network);
-//    free_network(MNIST_network);
+    free_network(MNIST_network);
 }
 
 void train_network() {
@@ -179,7 +182,7 @@ void train_network() {
     int validation_numbers = 10000;
     int test_number = 10000;
 
-    int epoch = 4;
+    int epoch = 5;
     int epoch2 = 0;
     int batch_size = 32;
     double b1 = 0.9;
@@ -203,16 +206,18 @@ void train_network() {
         learn_step_adam_future_reader_batch(MNIST_network, decay_learning_rate(5e-4, 1e-3, p), &train_reader,
                                             gereral_regularization, p, adam_params);
 
+        printf("train:      ");
         test_network_paired(MNIST_network, &train_reader, gereral_regularization);
+        printf("validation: ");
         test_network_paired(MNIST_network, &validation_reader, gereral_regularization);
     }
 
-    save_neural_network(ADAM_NETWORK_FILE, MNIST_network);
+//    save_neural_network(ADAM_NETWORK_FILE, MNIST_network);
 
     for (int p = epoch; p < epoch + epoch2; ++p) {
         printf("EPOCH %d\n", p + 1);
 
-        learn_step_nesterov_reader_batch(MNIST_network, decay_learning_rate(1e-4, 1e-3, p - epoch),
+        learn_step_nesterov_reader_batch(MNIST_network, decay_learning_rate(1e-6, 1, p - epoch),
                                          &train_reader, gereral_regularization, p,
                                          nesterov_params);
         test_network_paired(MNIST_network, &train_reader, gereral_regularization);
@@ -229,7 +234,7 @@ void train_network() {
     test_network_paired(MNIST_network, &test_reader, gereral_regularization);
     confusion_matrix_paired(MNIST_network, &test_reader);
     close_data_reader(test_reader);
-    save_neural_network(NN_FILE, MNIST_network);
+//    save_neural_network(NN_FILE, MNIST_network);
     free_network(MNIST_network);
 }
 

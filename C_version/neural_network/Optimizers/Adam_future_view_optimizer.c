@@ -163,7 +163,8 @@ void learn_step_adam_future_batch(network_start_layer network, double learning_r
     for (int i = 0; i < start_result_layers[0].size; i++) {
         matrix derived_results = matrix_copy_activated(prediction[i][network_layer_number],
                                                        current->activation_function);
-        matrix nablaC = general_regularizations.nablaC(derived_results, start_result_layers[1].batch_elements[i]);
+        matrix nablaC = general_regularizations.nablaC(*current, derived_results,
+                                                       start_result_layers[1].batch_elements[i]);
         matrix_free(derived_results);
         derived_results = matrix_copy_activated(prediction[i][network_layer_number],
                                                 current->activation_function_derivative);

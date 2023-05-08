@@ -30,7 +30,7 @@ struct regularization_params {
 struct general_regularization_params {
     //int batch_size;
 
-    matrix (*nablaC)(matrix, matrix);
+    matrix (*nablaC)(neural_network, matrix, matrix);
 
     double (*cost_function)(matrix, matrix);
 };
