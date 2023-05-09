@@ -262,7 +262,7 @@ double train_network_for_grid(network_start_layer *network, grid_param *params) 
     for (int p = epoch; p < epoch + epoch2; ++p) {
         printf("EPOCH %d\n", p + 1);
 
-        learn_step_nesterov_reader_batch(*network, decay_learning_rate(1e-4, 1e-3, p - epoch),
+        learn_step_nesterov_reader_batch(*network, cosine_learning_rate(1e-4, 1e-7, epoch, p),
                                          &train_reader, gereral_regularization, p,
                                          nesterov_params);
         test_network_paired(*network, &train_reader, gereral_regularization);
