@@ -32,24 +32,24 @@ void train_network();
 
 
 double l1l2(int epoch) {
-//    if (epoch < 1)
-//        return 5e-4;
-//    if (epoch < 5)
-//        return 1e-4;
-//    if (epoch < 7)
-//        return 5e-5;
-//    if (epoch < 9)
-//        return 1e-5;
+    if (epoch < 1)
+        return 5e-6;
+    if (epoch < 5)
+        return 1e-6;
+    if (epoch < 7)
+        return 5e-7;
+    if (epoch < 9)
+        return 1e-5;
     return 0;
 }
 
 double lr(int epoch_number) {
     if (epoch_number < 1)
-        return 3e-4;
-    if (epoch_number < 6)
-        return 9e-5;
+        return 1.5e-4;
+    if (epoch_number < 3)
+        return 5e-5;
     if (epoch_number < 7)
-        return 1e-6;
+        return 2e-5;
     if (epoch_number < 9)
         return 5e-7;
     return 1e-7;
@@ -59,7 +59,7 @@ regularization_params init_reg_params() {
     regularization_params regularization;
     regularization.l1 = l1l2;
     regularization.l2 = l1l2;
-    set_weights(&regularization, XAVIER_NORMALIZED);
+    set_weights(&regularization, HE_WEIGHT_INITIALIZATION);
     return regularization;
 }
 
@@ -68,6 +68,8 @@ network_start_layer initialise_network() {
     regularization_params regularization = init_reg_params();
 
     add_layer(&network, 150, ReLu, regularization);
+
+    set_weights(&regularization, XAVIER_NORMALIZED);
     add_layer(&network, 10, Softmax, regularization);
     return network;
 }
@@ -168,7 +170,7 @@ void train_network() {
     double b1 = 0.9;
     double b2 = 0.95;
 
-    Adam_future_params adam_params;
+    Adam_params adam_params;
     adam_params.b1 = b1;
     adam_params.b2 = b2;
 
@@ -183,8 +185,8 @@ void train_network() {
                                                        batch_size, data_prepear);
     for (int p = 0; p < epoch; ++p) {
         printf("EPOCH %d\n", p + 1);
-        learn_step_adam_future_reader_batch(MNIST_network, decay_learning_rate(1e-4, 1.5, p), &train_reader,
-                                            gereral_regularization, p, adam_params);
+        learn_step_adam_reader_batch(MNIST_network, lr(p), &train_reader,
+                                     gereral_regularization, p, adam_params);
 
         printf("train:      ");
         test_network_paired(MNIST_network, &train_reader, gereral_regularization);
@@ -192,7 +194,7 @@ void train_network() {
         test_network_paired(MNIST_network, &validation_reader, gereral_regularization);
     }
 
-//    save_neural_network(ADAM_NETWORK_FILE, MNIST_network);
+    save_neural_network(ADAM_NETWORK_FILE, MNIST_network);
 
     for (int p = epoch; p < epoch + epoch2; ++p) {
         printf("EPOCH %d\n", p + 1);

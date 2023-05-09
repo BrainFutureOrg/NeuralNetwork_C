@@ -66,8 +66,6 @@ void softmax_stable(matrix *M) {
             result.table[i][j] = exp(M->table[i][j] - max) / sum;
         }
     }
-    if (errno)
-        printf("4) %d\n", errno);
 
     matrix_free(*M);
     *M = result;
