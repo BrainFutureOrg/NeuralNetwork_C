@@ -43,11 +43,15 @@ double l1l2(int epoch) {
     return 0;
 }
 
+double l1l2_0(int epoch) {
+    return 0;
+}
+
 double lr(int epoch_number) {
     if (epoch_number < 1)
         return 1.5e-4;
     if (epoch_number < 3)
-        return 5e-5;
+        return 9e-5;
     if (epoch_number < 7)
         return 2e-5;
     if (epoch_number < 9)
@@ -59,7 +63,7 @@ regularization_params init_reg_params() {
     regularization_params regularization;
     regularization.l1 = l1l2;
     regularization.l2 = l1l2;
-    set_weights(&regularization, HE_WEIGHT_INITIALIZATION);
+    set_weights(&regularization, XAVIER_NORMALIZED);
     return regularization;
 }
 
@@ -199,7 +203,7 @@ void train_network() {
     for (int p = epoch; p < epoch + epoch2; ++p) {
         printf("EPOCH %d\n", p + 1);
 
-        learn_step_nesterov_reader_batch(MNIST_network, decay_learning_rate(1e-6, 1, p - epoch),
+        learn_step_nesterov_reader_batch(MNIST_network, lr(p),
                                          &train_reader, gereral_regularization, p,
                                          nesterov_params);
         test_network_paired(MNIST_network, &train_reader, gereral_regularization);
@@ -216,7 +220,9 @@ void train_network() {
     test_network_paired(MNIST_network, &test_reader, gereral_regularization);
     confusion_matrix_paired(MNIST_network, &test_reader);
     close_data_reader(test_reader);
-//    save_neural_network(NN_FILE, MNIST_network);
+
+    save_neural_network(NN_FILE, MNIST_network);
+
     free_network(MNIST_network);
 }
 

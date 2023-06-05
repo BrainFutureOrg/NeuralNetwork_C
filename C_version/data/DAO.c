@@ -74,6 +74,11 @@ batch *read_batch_from_data_nn(data_reader *reader) {
     }
     data[1] = answers;
     data[0] = for_predict;
+    ////////
+    for (int i = 0; i < sample_number; i++) {
+        matrix_fill_edges_0_inplace(data[0].batch_elements[i]);
+    }
+    ////////
     reader->this_elem += sample_number;
     return data;
 }
