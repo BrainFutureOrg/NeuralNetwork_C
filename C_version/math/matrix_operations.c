@@ -306,3 +306,27 @@ matrix matrix_average(int num, matrix *matrixes_for_operation) {
     matrix_multiply_by_constant(result, 1. / num);
     return result;
 }
+
+void matrix_fill_edges_0_inplace(matrix matrix_for_operation) {
+    for (int i = 0; i < matrix_for_operation.i; i++) {
+        if ((i - 7) % 28 >= 14)matrix_for_operation.table[i][0] = 0;
+    }
+}
+
+void matrix_cut_edges_inplace(matrix *matrix_for_operation) {
+    int i2 = 0;
+    /*double** newtable= calloc(matrix_for_operation.i/2, sizeof(double*));
+    for(int i=0; i<matrix_for_operation.i/2; i++){
+        newtable[i]= calloc(1, sizeof(double ));
+    }*/
+    matrix newmatrix = matrix_creation(matrix_for_operation->i / 2, 1);
+    for (int i = 0; i < matrix_for_operation->i; i++) {
+        if ((i - 7) % 28 < 14) {
+            //matrix_for_operation.table[i][0] = 0;
+            newmatrix.table[i2][0] = matrix_for_operation->table[i][0];
+            i2++;
+        }
+    }
+    matrix_free(*matrix_for_operation);
+    matrix_for_operation = &newmatrix;
+}

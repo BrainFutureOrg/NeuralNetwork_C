@@ -33,14 +33,12 @@ void train_network();
 
 double l1l2(int epoch) {
     if (epoch < 1)
-        return 5e-6;
-    if (epoch < 5)
-        return 1e-6;
+        return 2e-4;
+    if (epoch < 3)
+        return 6e-5;
     if (epoch < 7)
         return 5e-7;
-    if (epoch < 9)
-        return 1e-5;
-    return 0;
+    return 1e-8;
 }
 
 double l1l2_0(int epoch) {
@@ -49,14 +47,14 @@ double l1l2_0(int epoch) {
 
 double lr(int epoch_number) {
     if (epoch_number < 1)
-        return 1.5e-4;
+        return 2e-4;
     if (epoch_number < 3)
         return 9e-5;
     if (epoch_number < 7)
-        return 2e-5;
+        return 8e-6;
     if (epoch_number < 9)
-        return 5e-7;
-    return 1e-7;
+        return 8e-7;
+    return 3e-7;
 }
 
 regularization_params init_reg_params() {
@@ -71,10 +69,10 @@ network_start_layer initialise_network() {
     network_start_layer network = create_network(28 * 28);
     regularization_params regularization = init_reg_params();
 
-    add_layer(&network, 150, ReLu, regularization);
+    add_layer(&network, 150, Sigmoid, regularization);
 
     set_weights(&regularization, XAVIER_NORMALIZED);
-    add_layer(&network, 10, Softmax, regularization);
+    add_layer(&network, 10, Sigmoid, regularization);
     return network;
 }
 
@@ -164,12 +162,12 @@ void train_saved_network() {
 void train_network() {
 
     network_start_layer MNIST_network = initialise_network();
-    int train_numbers = 20000;
+    int train_numbers = 10000;
     int validation_numbers = 10000;
     int test_number = 10000;
 
-    int epoch = 5;
-    int epoch2 = 0;
+    int epoch = 3;
+    int epoch2 = 7;
     int batch_size = 32;
     double b1 = 0.9;
     double b2 = 0.95;
@@ -229,7 +227,7 @@ void train_network() {
 double train_network_for_grid(network_start_layer *network, grid_param *params) {
 
     //network_start_layer MNIST_network = initialise_network();
-    int train_numbers = 30000;
+    int train_numbers = 10000;
     int validation_numbers = 10000;
     int test_number = 10000;
 
@@ -249,7 +247,7 @@ double train_network_for_grid(network_start_layer *network, grid_param *params) 
     double decay_start = params[3].d;
 
     general_regularization_params gereral_regularization;
-    paste_cost(&gereral_regularization, cross_entropy);
+    paste_cost(&gereral_regularization, MSE);//TODO replace with crossentropy
 
     data_reader train_reader = create_data_reader("mnist_train.csv", 0, train_numbers, batch_size, data_prepear);
     data_reader validation_reader = create_data_reader("mnist_train.csv", train_numbers + 1, validation_numbers,
