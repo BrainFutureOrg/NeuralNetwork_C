@@ -57,7 +57,7 @@ matrix **predict_all_layers_batch(network_start_layer network, matrix *start_lay
 
 
 void learn_step_batch(network_start_layer network, double learning_rate, batch *start_result_layers,
-                      int epoch, general_regularization_params general_regularizations,
+                      int epoch,
                       void (*gradient_descent)(neural_network *, matrix *, int, double, matrix **, int, int, void *),
                       void *gradient_params) {
     matrix **prediction = predict_all_layers_batch(network, start_result_layers[0].batch_elements,
@@ -69,7 +69,7 @@ void learn_step_batch(network_start_layer network, double learning_rate, batch *
     for (int i = 0; i < start_result_layers[0].size; i++) {
         matrix derived_results = matrix_copy_activated(prediction[i][network_layer_number],
                                                        current->activation_function);
-        matrix nablaC = general_regularizations.nablaC(*current, derived_results,
+        matrix nablaC = network.general_regularization.nablaC(*current, derived_results,
                                                        start_result_layers[1].batch_elements[i]);
         matrix_free(derived_results);
 
@@ -106,24 +106,54 @@ void learn_step_batch(network_start_layer network, double learning_rate, batch *
 }
 
 void learn_step_reader(network_start_layer network, double learning_rate, data_reader *reader,
-                       general_regularization_params general_regularization,
                        int epoch, void *(*create_gradient_params)(network_start_layer),
                        void *(*free_gradient_params)(network_start_layer, void *),
                        void (*gradient_descent)(neural_network *, matrix *, int, double, matrix **, int, int, void *)) {
     int iter_number =
             reader->sample_number / reader->batch_size + (reader->sample_number % reader->batch_size == 0 ? 0 : 1);
     progress_bar bar = create_bar(iter_number);
-    void *gradient_params = create_gradient_params(network);
+    void *gradient_params = create_gradient_params!=NULL?create_gradient_params(network):NULL;
     for (int i = 0; i < iter_number; i++) {
         batch *batch_pair = read_batch_from_data_nn(reader);
-        learn_step_batch(network, learning_rate, batch_pair, epoch, general_regularization, gradient_descent,
-                         NULL);
+        learn_step_batch(network, learning_rate, batch_pair, epoch, gradient_descent,
+                         gradient_params);
         batch_free(batch_pair[0]);
         batch_free(batch_pair[1]);
         free(batch_pair);
         bar_step(&bar);
     }
     delete_bar(&bar);
-    free_gradient_params(network, gradient_params);
+    if(gradient_params!=NULL)free_gradient_params(network, gradient_params);
     data_reader_rollback(reader);
+}
+
+void finish_gd(neural_network *layer, matrix new_weights, matrix new_bias, int epoch){
+    matrix l1_mtrx = matrix_copy(layer->weights);
+    matrix_function_to_elements(l1_mtrx, signum);
+    matrix_multiply_by_constant(l1_mtrx, layer->regularization_params.l1(epoch));
+
+    matrix l2_mtrx = matrix_copy(layer->weights);
+    matrix_multiply_by_constant(l2_mtrx, layer->regularization_params.l2(epoch));
+
+    matrix_subtract_inplace(new_weights, l1_mtrx);
+    matrix_subtract_inplace(new_weights, l2_mtrx);
+
+    matrix_free(layer->bias);
+    matrix_free(layer->weights);
+    layer->weights = new_weights;
+    layer->bias = new_bias;
+
+    matrix_free(l1_mtrx);
+    matrix_free(l2_mtrx);
+}
+
+matrix multiplied_for_weights(neural_network *layer, matrix *error, matrix **previous_values, int number_of_current_layer, int i){
+    matrix a = matrix_copy(previous_values[i][number_of_current_layer]);
+    if (layer->previous_layer != NULL)
+        layer->previous_layer->activation_function(&a);
+    matrix transpozed = matrix_transposition(a);
+    matrix_free(a);
+    matrix multiplied = matrix_multiplication(error[i], transpozed);
+    matrix_free(transpozed);
+    return multiplied;
 }
