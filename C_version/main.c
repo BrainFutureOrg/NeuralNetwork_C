@@ -37,7 +37,7 @@ double l1l2(int epoch) {
     if (epoch < 3)
         return 6e-7;
     if (epoch < 7)
-        return 5e-7;
+        return 5e-8;
     return 1e-8;
 }
 
@@ -51,10 +51,10 @@ double lr(int epoch_number) {
     if (epoch_number < 3)
         return 8e-5;
     if (epoch_number < 7)
-        return 8e-6;
+        return 2e-5;
     if (epoch_number < 9)
-        return 8e-7;
-    return 3e-7;
+        return 5e-6;
+    return 8e-7;
 }
 
 regularization_params init_reg_params() {
@@ -162,7 +162,7 @@ void train_saved_network() {
 void train_network() {
 
     network_start_layer MNIST_network = initialise_network();
-    int train_numbers = 10000;
+    int train_numbers = 30000;
     int validation_numbers = 10000;
     int test_number = 10000;
 
