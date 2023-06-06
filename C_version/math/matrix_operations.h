@@ -72,4 +72,6 @@ matrix matrix_average(int num, matrix *matrixes_for_operation);
 
 void matrix_fill_edges_0_inplace(matrix matrix_for_operation);
 
+void matrix_cut_edges_inplace(matrix *matrix_for_operation);
+
 #endif //C_VERSION_MATRIX_OPERATIONS_H

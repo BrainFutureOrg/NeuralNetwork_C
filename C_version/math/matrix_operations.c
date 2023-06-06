@@ -321,12 +321,12 @@ void matrix_cut_edges_inplace(matrix *matrix_for_operation) {
     }*/
     matrix newmatrix = matrix_creation(matrix_for_operation->i / 2, 1);
     for (int i = 0; i < matrix_for_operation->i; i++) {
-        if ((i - 7) % 28 < 14) {
+        if (i % 28 < 7 || i % 28 > 21) {
             //matrix_for_operation.table[i][0] = 0;
             newmatrix.table[i2][0] = matrix_for_operation->table[i][0];
             i2++;
         }
     }
     matrix_free(*matrix_for_operation);
-    matrix_for_operation = &newmatrix;
+    *matrix_for_operation = newmatrix;
 }

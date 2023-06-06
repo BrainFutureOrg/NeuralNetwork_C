@@ -33,9 +33,9 @@ void train_network();
 
 double l1l2(int epoch) {
     if (epoch < 1)
-        return 2e-4;
+        return 2e-6;
     if (epoch < 3)
-        return 6e-5;
+        return 6e-7;
     if (epoch < 7)
         return 5e-7;
     return 1e-8;
@@ -49,7 +49,7 @@ double lr(int epoch_number) {
     if (epoch_number < 1)
         return 2e-4;
     if (epoch_number < 3)
-        return 9e-5;
+        return 8e-5;
     if (epoch_number < 7)
         return 8e-6;
     if (epoch_number < 9)
@@ -66,7 +66,7 @@ regularization_params init_reg_params() {
 }
 
 network_start_layer initialise_network() {
-    network_start_layer network = create_network(28 * 28);
+    network_start_layer network = create_network(28 * 28 / 2);
     regularization_params regularization = init_reg_params();
 
     add_layer(&network, 150, Sigmoid, regularization);
@@ -204,7 +204,9 @@ void train_network() {
         learn_step_nesterov_reader_batch(MNIST_network, lr(p),
                                          &train_reader, gereral_regularization, p,
                                          nesterov_params);
+        printf("train:      ");
         test_network_paired(MNIST_network, &train_reader, gereral_regularization);
+        printf("validation: ");
         test_network_paired(MNIST_network, &validation_reader, gereral_regularization);
     }
 
